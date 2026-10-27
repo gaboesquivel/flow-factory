@@ -16,6 +16,7 @@ pnpm install
 npx skills add gaboesquivel/flow-skills --skill '*' -a cursor -y
 pnpm factory    # http://127.0.0.1:3747
 pnpm dev        # service + dashboard http://localhost:3750
+pnpm test:browser   # Playwright smoke (starts service + web)
 ```
 
 CLI (from repo root after service is running):

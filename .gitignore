@@ -6,6 +6,8 @@ node_modules
 .next
 dist
 .data
+.data-playwright
+apps/web/tests/browser/test-results
 *.db
 *.tsbuildinfo
 .env

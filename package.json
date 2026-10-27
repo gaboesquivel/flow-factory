@@ -7,6 +7,7 @@
     "factory": "pnpm --filter @flow-factory/service start",
     "factory:mcp": "FLOW_FACTORY_DATA_DIR=.data pnpm --filter @flow-factory/service exec node --import tsx src/mcp-main.ts",
     "test": "pnpm -r test",
+    "test:browser": "pnpm --filter @flow-factory/web test:browser",
     "check-types": "pnpm -r check-types",
     "lint": "oxfmt --check . && oxlint .",
     "lint:fix": "oxfmt --write . && oxlint --fix ."

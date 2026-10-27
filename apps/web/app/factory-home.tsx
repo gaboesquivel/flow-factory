@@ -1,6 +1,7 @@
-import type { KanbanColumn } from "@flow-factory/domain";
+import type { FactoryStatus, KanbanColumn } from "@flow-factory/domain";
 
 import { KanbanBoard } from "./kanban-board";
+import { FactoryStatusPanel } from "./factory-status-panel";
 import { FactoryToolbar } from "./factory-toolbar";
 
 type Props = {
@@ -21,8 +22,13 @@ type TaskCard = {
 export const FactoryHome = ({ status, tasks, error }: Props) => {
   const typedTasks = tasks as TaskCard[];
 
+  const factoryStatus = status as FactoryStatus | null;
+
   return (
-    <main style={{ padding: "1.5rem", maxWidth: 1200, margin: "0 auto" }}>
+    <main
+      data-testid="factory-home"
+      style={{ padding: "1.5rem", maxWidth: 1200, margin: "0 auto" }}
+    >
       <header style={{ marginBottom: "1.5rem" }}>
         <h1 style={{ margin: 0 }}>Flow Factory</h1>
         <p style={{ color: "#626a65" }}>
@@ -42,16 +48,13 @@ export const FactoryHome = ({ status, tasks, error }: Props) => {
         </p>
       ) : null}
 
-      {status ? (
-        <section aria-label="Factory status" style={{ marginBottom: "1.5rem" }}>
-          <h2>Status</h2>
-          <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
-            {JSON.stringify(status, null, 2)}
-          </pre>
-        </section>
+      {factoryStatus ? (
+        <div style={{ marginBottom: "1.5rem" }}>
+          <FactoryStatusPanel status={factoryStatus} />
+        </div>
       ) : null}
 
-      <section aria-label="Task board">
+      <section aria-label="Task board" data-testid="task-board">
         <h2>Tasks</h2>
         {typedTasks.length === 0 ? (
           <p>No tasks yet. Configure GitHub with the CLI, then use Sync GitHub above.</p>
