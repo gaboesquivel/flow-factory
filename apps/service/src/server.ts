@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import type { KanbanColumn, SpecialistRole } from "@flow-factory/domain";
 
 import { authorizeRequest } from "./auth.js";
+import { cleanupRunWorktree } from "./worktree.js";
 import type { Store } from "./store.js";
 
 const readJson = async (request: import("node:http").IncomingMessage) => {
@@ -20,10 +21,12 @@ const sendJson = (response: import("node:http").ServerResponse, status: number, 
 export const createHttpServer = ({
   store,
   token,
+  repoRoot,
   onMutation,
 }: {
   store: Store;
   token: string;
+  repoRoot: string;
   onMutation?: () => void;
 }) =>
   createServer(async (request, response) => {
@@ -69,6 +72,7 @@ export const createHttpServer = ({
         task,
         handoff: store.getHandoff(id),
         activity: store.listTaskActivity(id),
+        runs: store.listRunsForTask(id),
       });
       return;
     }
@@ -178,12 +182,21 @@ export const createHttpServer = ({
 
     if (path.endsWith("/cancel") && method === "POST") {
       const runId = decodeURIComponent(path.slice("/v1/runs/".length, -"/cancel".length));
+      const before = store.getRun(runId);
       const run = store.cancelRun(runId);
       if (!run) {
         sendJson(response, 409, { error: "cancel_failed" });
         return;
       }
-      sendJson(response, 200, { run });
+      if (before?.worktreePath) {
+        await cleanupRunWorktree({
+          repoRoot,
+          runId,
+          worktreePath: before.worktreePath,
+        });
+        store.clearRunWorktree({ runId });
+      }
+      sendJson(response, 200, { run: store.getRun(runId) });
       return;
     }
 
@@ -247,12 +260,39 @@ export const createHttpServer = ({
 
     if (path === "/v1/reviews/draft-pr" && method === "POST") {
       const body = await readJson(request);
+      const runId = String(body.runId ?? "");
+      const before = store.getRun(runId);
       const result = await store.approveReviewWithDraftPr({
-        runId: String(body.runId ?? ""),
+        runId,
         evidence: String(body.evidence ?? ""),
         humanAuthorized: Boolean(body.humanAuthorized),
       });
+      if (result.ok && before?.worktreePath) {
+        await cleanupRunWorktree({
+          repoRoot,
+          runId,
+          worktreePath: before.worktreePath,
+        });
+        store.clearRunWorktree({ runId });
+      }
       sendJson(response, result.ok ? 201 : 409, result);
+      return;
+    }
+
+    if (path.endsWith("/worktree/discard") && method === "POST") {
+      const runId = decodeURIComponent(path.slice("/v1/runs/".length, -"/worktree/discard".length));
+      const run = store.getRun(runId);
+      if (!run?.worktreePath) {
+        sendJson(response, 404, { error: "no_worktree" });
+        return;
+      }
+      await cleanupRunWorktree({
+        repoRoot,
+        runId,
+        worktreePath: run.worktreePath,
+      });
+      store.clearRunWorktree({ runId });
+      sendJson(response, 200, { ok: true, run: store.getRun(runId) });
       return;
     }
 

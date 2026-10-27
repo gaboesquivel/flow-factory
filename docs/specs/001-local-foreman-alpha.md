@@ -1,6 +1,6 @@
 # 001 — Local Foreman Alpha
 
-**Status:** In progress (foundation landed)  
+**Status:** Alpha complete (local verification; adapters depend on host tooling)  
 **Owner:** Flow Factory
 
 ## Problem Statement
@@ -42,7 +42,7 @@ Cloud hosting, Linear, multi-repo orchestration, MLX, autonomous merge, billing,
 | F02 | Projects V2 Kanban mapping          | Alpha (PR2)          |
 | F03 | Local loopback service              | Alpha                |
 | F04 | SQLite durability                   | Alpha                |
-| F05 | Shared API / CLI / MCP              | MCP PR2+             |
+| F05 | Shared API / CLI / MCP              | Alpha                |
 | F06 | Exclusive task reservations         | Alpha (PR3)          |
 | F07 | Handoffs                            | Alpha (PR3)          |
 | F08 | Run coordinator                     | Alpha (PR4)          |

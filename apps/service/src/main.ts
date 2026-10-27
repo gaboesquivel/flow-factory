@@ -27,6 +27,7 @@ const coordinator = createCoordinator({ store, repoRoot });
 const server = createHttpServer({
   store,
   token,
+  repoRoot,
   onMutation: () => coordinator.tick(),
 });
 

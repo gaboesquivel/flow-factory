@@ -38,3 +38,16 @@ export const removeRunWorktree = async ({
     () => undefined,
   );
 };
+
+export const cleanupRunWorktree = async ({
+  repoRoot,
+  runId,
+  worktreePath,
+}: {
+  repoRoot: string;
+  runId: string;
+  worktreePath: string | null;
+}) => {
+  if (!worktreePath) return;
+  await removeRunWorktree({ repoRoot, runId });
+};
