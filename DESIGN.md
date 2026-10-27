@@ -2,7 +2,7 @@
 
 ## Experience
 
-The home screen is a **task board**: five Kanban columns backed by GitHub Issues and Projects, with blocked state and run status on each card. Task detail surfaces acceptance criteria, handoffs, runs, and sync errors.
+The home screen is a **task board**: five Kanban columns backed by GitHub Issues and Projects, with drag-and-drop moves, a compact factory status strip, and **Sync GitHub** in the header. Cards show blocked state, run status, and sync errors. Task detail surfaces acceptance criteria, handoffs, runs, column moves, and authorized draft PR actions.
 
 Secondary areas cover runs, specialists, and settings (connections, adapters, pause).
 

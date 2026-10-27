@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { FactoryStatus, KanbanColumn } from "@flow-factory/domain";
 
 import { KanbanBoard } from "./kanban-board";
@@ -35,8 +37,17 @@ export const FactoryHome = ({ status, tasks, error }: Props) => {
           GitHub-backed tasks, local service, shared state across dashboard, CLI, and MCP.
         </p>
         {!error ? (
-          <div style={{ marginTop: "0.75rem" }}>
+          <div
+            style={{
+              marginTop: "0.75rem",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
             <FactoryToolbar />
+            <Link href="/settings">Settings</Link>
           </div>
         ) : null}
       </header>

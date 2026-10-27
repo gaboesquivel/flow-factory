@@ -27,8 +27,10 @@ A local Flow Factory: GitHub Issues as tasks, a loopback service with SQLite, da
 
 ## Testing Decisions
 
-- `node:test` on domain transitions, store idempotency, and concurrent claims.
-- Integration tests expand in PRs 2–5 (GitHub sync, restart, cancellation).
+- `node:test` on domain transitions, store idempotency, concurrent claims, GitHub write planning, and worktree sweep.
+- `pnpm test:browser` (Playwright): home status panel, sync control, Kanban drag → column API + GitHub write-back path.
+- Manual acceptance: [manual-alpha-checklist.md](../manual-alpha-checklist.md) (`gh`, optional `agent login`, Projects scope).
+- CI on `main`: `check-types`, `test`, `test:browser` (see `.github/workflows/ci.yml`).
 
 ## Out of Scope (Alpha)
 

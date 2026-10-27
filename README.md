@@ -35,7 +35,7 @@ Bearer token: `.data/local.token` (created on first service start).
 
 ## Docs
 
-[PRODUCT.md](PRODUCT.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [Spec 001](docs/specs/001-local-foreman-alpha.md)
+[PRODUCT.md](PRODUCT.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [Spec 001](docs/specs/001-local-foreman-alpha.md) · [Plan 002](docs/planning/002-post-alpha.md)
 
 ## Alpha status
 
