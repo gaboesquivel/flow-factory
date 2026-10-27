@@ -35,6 +35,13 @@ test("home shows status panel and sync", async ({ page }) => {
   await expect(page.getByText("Playwright drag task")).toBeVisible();
 });
 
+test("settings page loads GitHub and factory controls", async ({ page }) => {
+  await page.goto("/settings");
+  await expect(page.getByTestId("settings-page")).toBeVisible();
+  await expect(page.getByTestId("settings-github")).toBeVisible();
+  await expect(page.getByTestId("settings-factory")).toBeVisible();
+});
+
 test("drag task updates Kanban column", async ({ page }) => {
   await page.goto("/");
   const card = page.locator("li").filter({ hasText: "Playwright drag task" });

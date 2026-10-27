@@ -2,13 +2,14 @@
 
 Flow Factory Alpha on branch `factory/*` → PRs to `main`.
 
-| Document                                                                       | Use                  |
-| ------------------------------------------------------------------------------ | -------------------- |
-| [PRODUCT.md](PRODUCT.md)                                                       | Product identity     |
-| [ARCHITECTURE.md](ARCHITECTURE.md)                                             | Technical boundaries |
-| [docs/specs/001-local-foreman-alpha.md](docs/specs/001-local-foreman-alpha.md) | Alpha specification  |
-| [docs/planning/002-post-alpha.md](docs/planning/002-post-alpha.md)             | Post-Alpha plan      |
-| [docs/manual-alpha-checklist.md](docs/manual-alpha-checklist.md)               | Manual acceptance    |
+| Document                                                                       | Use                    |
+| ------------------------------------------------------------------------------ | ---------------------- |
+| [PRODUCT.md](PRODUCT.md)                                                       | Product identity       |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                                             | Technical boundaries   |
+| [docs/specs/001-local-foreman-alpha.md](docs/specs/001-local-foreman-alpha.md) | Alpha specification    |
+| [docs/planning/002-post-alpha.md](docs/planning/002-post-alpha.md)             | Post-Alpha plan (done) |
+| [docs/specs/002-beta-dashboard-ops.md](docs/specs/002-beta-dashboard-ops.md)   | Beta dashboard ops     |
+| [docs/manual-alpha-checklist.md](docs/manual-alpha-checklist.md)               | Manual acceptance      |
 
 Install Flow Skills: `npx skills add gaboesquivel/flow-skills --skill '*' -a cursor -y`
 
