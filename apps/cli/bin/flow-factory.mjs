@@ -63,6 +63,17 @@ if (command === "status") {
       2,
     ),
   );
+} else if (command === "move" && args[0] && args[1]) {
+  console.log(
+    JSON.stringify(
+      await request(`/v1/tasks/${encodeURIComponent(args[0])}/update`, {
+        method: "POST",
+        body: { column: args[1] },
+      }),
+      null,
+      2,
+    ),
+  );
 } else if (command === "handoff" && args[0]) {
   console.log(
     JSON.stringify(
@@ -80,7 +91,7 @@ if (command === "status") {
   );
 } else {
   console.log(
-    "Usage: flow-factory <status|tasks|task <id>|sync|configure <owner> <repo> [project#]|claim <id> <holder>|handoff <id> [summary] [next] [context]>",
+    "Usage: flow-factory <status|tasks|task <id>|sync|configure <owner> <repo> [project#]|move <id> <column>|claim <id> <holder>|handoff <id> [summary] [next] [context]>",
   );
   process.exit(1);
 }

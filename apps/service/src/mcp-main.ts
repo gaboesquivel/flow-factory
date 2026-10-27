@@ -3,9 +3,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { join } from "node:path";
 import { z } from "zod";
 
+import { kanbanColumns } from "@flow-factory/domain";
+
 import { openDatabase } from "./db.js";
 import { createStore } from "./store.js";
 import { resolveDbPath } from "./config.js";
+import { moveTaskColumn } from "./task-column.js";
 
 const dataDir = process.env.FLOW_FACTORY_DATA_DIR ?? join(process.cwd(), ".data");
 const db = openDatabase(resolveDbPath(dataDir));
@@ -131,6 +134,25 @@ server.registerTool(
       {
         type: "text" as const,
         text: JSON.stringify(store.submitResult({ runId, evidence, verified }), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
+  "update_task_column",
+  {
+    description: "Move task on Kanban and sync column to GitHub",
+    inputSchema: {
+      taskId: z.string(),
+      column: z.enum(kanbanColumns),
+    },
+  },
+  async ({ taskId, column }) => ({
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(await moveTaskColumn({ store, taskId, column }), null, 2),
       },
     ],
   }),

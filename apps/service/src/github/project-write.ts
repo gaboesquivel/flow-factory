@@ -117,6 +117,47 @@ type ProjectNode = {
   items?: { nodes?: unknown[] };
 };
 
+const fetchIssueNodeId = async ({
+  owner,
+  repo,
+  number,
+}: {
+  owner: string;
+  repo: string;
+  number: number;
+}) => {
+  const query = `query($owner: String!, $repo: String!, $number: Int!) {
+    repository(owner: $owner, name: $repo) {
+      issue(number: $number) { id }
+    }
+  }`;
+  const data = await ghGraphql<{ repository?: { issue?: { id: string } } }>(query, {
+    owner,
+    repo,
+    number,
+  });
+  return data.repository?.issue?.id ?? null;
+};
+
+const addIssueToProject = async ({
+  projectId,
+  contentId,
+}: {
+  projectId: string;
+  contentId: string;
+}) => {
+  const mutation = `mutation($projectId: ID!, $contentId: ID!) {
+    addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+      item { id }
+    }
+  }`;
+  const data = await ghGraphql<{ addProjectV2ItemById?: { item?: { id: string } } }>(mutation, {
+    projectId,
+    contentId,
+  });
+  return data.addProjectV2ItemById?.item?.id ?? null;
+};
+
 const writeProjectStatus = async ({
   config,
   issueNumber,
@@ -130,8 +171,18 @@ const writeProjectStatus = async ({
   if (!loaded.ok) return { ok: false as const, error: loaded.error };
   const { context } = loaded;
 
-  const itemId = context.itemIdByIssue.get(issueNumber);
-  if (!itemId) return { ok: false as const, error: "issue_not_on_project" };
+  let itemId = context.itemIdByIssue.get(issueNumber);
+  if (!itemId) {
+    const contentId = await fetchIssueNodeId({
+      owner: config.owner,
+      repo: config.repo,
+      number: issueNumber,
+    });
+    if (!contentId) return { ok: false as const, error: "issue_not_found" };
+    const addedItemId = await addIssueToProject({ projectId: context.projectId, contentId });
+    if (!addedItemId) return { ok: false as const, error: "add_to_project_failed" };
+    itemId = addedItemId;
+  }
 
   const optionId = context.optionIdByName.get(statusName);
   if (!optionId) return { ok: false as const, error: "status_option_not_found" };
@@ -202,9 +253,7 @@ export const writeTaskColumnToGithub = async ({
       statusName,
     });
     if (project.ok) return project;
-    if (project.error !== "issue_not_on_project" && project.error !== "status_option_not_found") {
-      return project;
-    }
+    if (project.error !== "status_option_not_found") return project;
   }
 
   try {

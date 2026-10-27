@@ -1,6 +1,6 @@
-import Link from "next/link";
+import type { KanbanColumn } from "@flow-factory/domain";
 
-import { kanbanColumns, type KanbanColumn } from "@flow-factory/domain";
+import { KanbanBoard } from "./kanban-board";
 
 type Props = {
   status: Record<string, unknown> | null;
@@ -17,20 +17,8 @@ type TaskCard = {
   syncError: string | null;
 };
 
-const columnLabel: Record<KanbanColumn, string> = {
-  backlog: "Backlog",
-  ready: "Ready",
-  in_progress: "In Progress",
-  in_review: "In Review",
-  done: "Done",
-};
-
 export const FactoryHome = ({ status, tasks, error }: Props) => {
   const typedTasks = tasks as TaskCard[];
-  const byColumn = kanbanColumns.map((column) => ({
-    column,
-    tasks: typedTasks.filter((task) => task.column === column),
-  }));
 
   return (
     <main style={{ padding: "1.5rem", maxWidth: 1200, margin: "0 auto" }}>
@@ -62,45 +50,7 @@ export const FactoryHome = ({ status, tasks, error }: Props) => {
         {typedTasks.length === 0 ? (
           <p>No tasks yet. Connect GitHub in a later increment or create a task via the API.</p>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${kanbanColumns.length}, minmax(0, 1fr))`,
-              gap: "0.75rem",
-            }}
-          >
-            {byColumn.map(({ column, tasks: columnTasks }) => (
-              <div key={column}>
-                <h3 style={{ fontSize: "0.9rem" }}>{columnLabel[column]}</h3>
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {columnTasks.map((task) => (
-                    <li
-                      key={task.id}
-                      style={{
-                        background: "#fff",
-                        border: "1px solid #7d867f",
-                        borderRadius: 8,
-                        padding: "0.75rem",
-                        marginBottom: "0.5rem",
-                      }}
-                    >
-                      <strong>
-                        <Link href={`/tasks/${encodeURIComponent(task.id)}`}>{task.title}</Link>
-                      </strong>
-                      <div style={{ fontSize: "0.85rem", color: "#626a65" }}>{task.id}</div>
-                      {task.blocked ? <div aria-label="Blocked">Blocked</div> : null}
-                      {task.runStatus ? <div>Run: {task.runStatus}</div> : null}
-                      {task.syncError ? (
-                        <div role="alert" style={{ color: "#8b1e1e" }}>
-                          {task.syncError}
-                        </div>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <KanbanBoard tasks={typedTasks} />
         )}
       </section>
     </main>
