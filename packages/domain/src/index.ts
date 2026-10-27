@@ -66,6 +66,8 @@ export type RunRecord = {
   specialist: SpecialistRole;
   adapter: "cursor" | "ollama" | "none";
   model: string | null;
+  worktreePath: string | null;
+  branchName: string | null;
   createdAt: string;
   updatedAt: string;
   evidence: string | null;

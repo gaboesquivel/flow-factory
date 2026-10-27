@@ -17,8 +17,10 @@ import { probeCursor, probeOllama } from "./adapters.js";
 import { listActivity, logActivity } from "./activity.js";
 import { defaultGithubConfig } from "./github/config.js";
 import { probeGhAuth } from "./github/gh.js";
+import { createAuthorizedDraftPr } from "./github/draft-pr.js";
 import { syncGithubIssues } from "./github/sync.js";
 import type { GithubConfig } from "./github/types.js";
+import { parseTaskId } from "@flow-factory/domain";
 
 const parseJson = <T>(value: string, fallback: T): T => {
   try {
@@ -294,6 +296,8 @@ export const createStore = (db: DatabaseSync) => {
       specialist: row.specialist as SpecialistRole,
       adapter: row.adapter as RunRecord["adapter"],
       model: row.model ? String(row.model) : null,
+      worktreePath: row.worktree_path ? String(row.worktree_path) : null,
+      branchName: row.branch_name ? String(row.branch_name) : null,
       createdAt: String(row.created_at),
       updatedAt: String(row.updated_at),
       evidence: row.evidence ? String(row.evidence) : null,
@@ -337,8 +341,8 @@ export const createStore = (db: DatabaseSync) => {
     const now = new Date().toISOString();
     const status: RunStatus = "queued";
     db.prepare(
-      `INSERT INTO runs (id, task_id, status, specialist, adapter, model, created_at, updated_at, evidence, error)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)`,
+      `INSERT INTO runs (id, task_id, status, specialist, adapter, model, worktree_path, branch_name, created_at, updated_at, evidence, error)
+       VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, NULL, NULL)`,
     ).run(id, taskId, status, specialist, adapter, model, now, now);
 
     const run = getRun(id)!;
@@ -440,6 +444,78 @@ export const createStore = (db: DatabaseSync) => {
     return { ok: true as const };
   };
 
+  const setRunWorktree = ({
+    runId,
+    worktreePath,
+    branchName,
+  }: {
+    runId: string;
+    worktreePath: string;
+    branchName: string;
+  }) => {
+    db.prepare("UPDATE runs SET worktree_path = ?, branch_name = ? WHERE id = ?").run(
+      worktreePath,
+      branchName,
+      runId,
+    );
+  };
+
+  const approveReviewWithDraftPr = async ({
+    runId,
+    evidence,
+    humanAuthorized,
+  }: {
+    runId: string;
+    evidence: string;
+    humanAuthorized: boolean;
+  }) => {
+    if (!humanAuthorized) {
+      return { ok: false as const, error: "human_authorization_required" };
+    }
+    const run = getRun(runId);
+    if (!run) return { ok: false as const, error: "run_not_found" };
+    if (run.status !== "completed" && run.status !== "awaiting_intervention") {
+      return { ok: false as const, error: "run_not_reviewable" };
+    }
+    const task = getTask(run.taskId);
+    if (!task) return { ok: false as const, error: "task_not_found" };
+
+    saveReview({ runId, verdict: "approve", evidence });
+
+    const ref = parseTaskId(run.taskId);
+    const branch =
+      run.branchName ?? (ref ? `factory/issue-${ref.number}-${runId.slice(0, 8)}` : null);
+    if (!branch || !run.worktreePath) {
+      return {
+        ok: false as const,
+        error: "no_worktree_or_branch",
+        review: getReview(runId),
+      };
+    }
+
+    try {
+      const draftPrUrl = await createAuthorizedDraftPr({
+        taskId: run.taskId,
+        branch,
+        title: task.title,
+        body: `${evidence}\n\n---\nLinked task: ${run.taskId}`,
+        worktreePath: run.worktreePath,
+      });
+      db.prepare("UPDATE review_records SET draft_pr_url = ? WHERE run_id = ?").run(
+        draftPrUrl,
+        runId,
+      );
+      logTaskActivity(run.taskId, "draft_pr_created", { runId, draftPrUrl });
+      return { ok: true as const, draftPrUrl, review: getReview(runId) };
+    } catch (error) {
+      return {
+        ok: false as const,
+        error: error instanceof Error ? error.message : "draft_pr_failed",
+        review: getReview(runId),
+      };
+    }
+  };
+
   const getReview = (runId: string) => {
     const row = db
       .prepare(
@@ -536,6 +612,8 @@ export const createStore = (db: DatabaseSync) => {
     cancelRun,
     submitResult,
     saveReview,
+    approveReviewWithDraftPr,
+    setRunWorktree,
     getReview,
     rememberIdempotent,
     markRunsUnknownOnRestart,

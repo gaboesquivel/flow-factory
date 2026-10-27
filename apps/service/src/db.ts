@@ -68,6 +68,16 @@ export const openDatabase = (path: string) => {
       created_at TEXT NOT NULL
     );
   `);
+  try {
+    db.exec("ALTER TABLE runs ADD COLUMN worktree_path TEXT");
+  } catch {
+    /* column exists */
+  }
+  try {
+    db.exec("ALTER TABLE runs ADD COLUMN branch_name TEXT");
+  } catch {
+    /* column exists */
+  }
   return db;
 };
 

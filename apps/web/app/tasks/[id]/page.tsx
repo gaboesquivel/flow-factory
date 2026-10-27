@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { TaskActions } from "../../task-actions";
+
 const apiBase = process.env.FLOW_FACTORY_URL ?? "http://127.0.0.1:3747";
 
 export default async ({ params }: { params: Promise<{ id: string }> }) => {
@@ -26,9 +28,12 @@ export default async ({ params }: { params: Promise<{ id: string }> }) => {
       <h1>Task detail</h1>
       {error ? <p role="alert">Could not load task: {error}</p> : null}
       {payload ? (
-        <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
-          {JSON.stringify(payload, null, 2)}
-        </pre>
+        <>
+          <TaskActions taskId={taskId} />
+          <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
+            {JSON.stringify(payload, null, 2)}
+          </pre>
+        </>
       ) : null}
     </main>
   );
