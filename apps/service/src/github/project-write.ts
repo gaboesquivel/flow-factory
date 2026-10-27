@@ -1,6 +1,7 @@
-import { parseTaskId, type KanbanColumn } from "@flow-factory/domain";
+import type { KanbanColumn } from "@flow-factory/domain";
 
-import { columnToProjectStatusName } from "./map.js";
+import { mergeFactoryColumnLabels } from "./labels.js";
+import { planTaskColumnWrite } from "./write-plan.js";
 import { ghApiJson, ghApiPatch, ghGraphql } from "./gh.js";
 import type { GithubConfig } from "./types.js";
 
@@ -221,10 +222,10 @@ const writeColumnLabel = async ({
   const issue = await ghApiJson<{ labels: { name: string }[] }>(
     `repos/${owner}/${repo}/issues/${issueNumber}`,
   );
-  const labels = issue.labels
-    .map((label) => label.name)
-    .filter((name) => !name.startsWith("factory-column:"));
-  labels.push(`factory-column:${column}`);
+  const labels = mergeFactoryColumnLabels({
+    labels: issue.labels.map((label) => label.name),
+    column,
+  });
   await ghApiPatch(`repos/${owner}/${repo}/issues/${issueNumber}`, { labels });
   return { ok: true as const, mode: "label" as const };
 };
@@ -238,19 +239,14 @@ export const writeTaskColumnToGithub = async ({
   taskId: string;
   column: KanbanColumn;
 }) => {
-  const ref = parseTaskId(taskId);
-  if (!ref) return { ok: false as const, error: "invalid_task_id" };
-  if (ref.owner !== config.owner || ref.repo !== config.repo) {
-    return { ok: false as const, error: "task_repo_mismatch" };
-  }
+  const plan = planTaskColumnWrite({ config, taskId, column });
+  if (!plan.ok) return plan;
 
-  const statusName = columnToProjectStatusName({ column, config });
-
-  if (config.projectNumber && statusName) {
+  if (plan.mode === "project" && plan.statusName) {
     const project = await writeProjectStatus({
       config,
-      issueNumber: ref.number,
-      statusName,
+      issueNumber: plan.ref.number,
+      statusName: plan.statusName,
     });
     if (project.ok) return project;
     if (project.error !== "status_option_not_found") return project;
@@ -258,9 +254,9 @@ export const writeTaskColumnToGithub = async ({
 
   try {
     return await writeColumnLabel({
-      owner: ref.owner,
-      repo: ref.repo,
-      issueNumber: ref.number,
+      owner: plan.ref.owner,
+      repo: plan.ref.repo,
+      issueNumber: plan.ref.number,
       column,
     });
   } catch (error) {

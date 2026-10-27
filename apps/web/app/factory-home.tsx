@@ -1,6 +1,7 @@
 import type { KanbanColumn } from "@flow-factory/domain";
 
 import { KanbanBoard } from "./kanban-board";
+import { FactoryToolbar } from "./factory-toolbar";
 
 type Props = {
   status: Record<string, unknown> | null;
@@ -27,6 +28,11 @@ export const FactoryHome = ({ status, tasks, error }: Props) => {
         <p style={{ color: "#626a65" }}>
           GitHub-backed tasks, local service, shared state across dashboard, CLI, and MCP.
         </p>
+        {!error ? (
+          <div style={{ marginTop: "0.75rem" }}>
+            <FactoryToolbar />
+          </div>
+        ) : null}
       </header>
 
       {error ? (
@@ -48,10 +54,9 @@ export const FactoryHome = ({ status, tasks, error }: Props) => {
       <section aria-label="Task board">
         <h2>Tasks</h2>
         {typedTasks.length === 0 ? (
-          <p>No tasks yet. Connect GitHub in a later increment or create a task via the API.</p>
-        ) : (
-          <KanbanBoard tasks={typedTasks} />
-        )}
+          <p>No tasks yet. Configure GitHub with the CLI, then use Sync GitHub above.</p>
+        ) : null}
+        {typedTasks.length > 0 ? <KanbanBoard tasks={typedTasks} /> : null}
       </section>
     </main>
   );
