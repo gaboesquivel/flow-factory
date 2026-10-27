@@ -8,4 +8,6 @@
 6. Open a task → **Work here**, **Save handoff**, reload — handoff persists in JSON detail.
 7. `agent login` — then **Delegate (Cursor)**; observe run status on task (may fail honestly if not logged in).
 8. MCP: `pnpm factory:mcp` — call `list_tasks` / `get_task` from a compatible client.
-9. After a completed Cursor run with worktree changes, POST `/v1/reviews/draft-pr` with `humanAuthorized: true` to open a draft PR (requires pushed branch and changes).
+9. After a completed Cursor run with worktree changes, use **Authorize draft PR** on the task page (or POST `/v1/reviews/draft-pr` with `humanAuthorized: true`).
+10. **Discard worktree** removes the local worktree after review; failed/cancelled runs clean up automatically.
+11. MCP tools: `list_tasks`, `get_task`, `sync_github`, `claim_task`, `save_handoff`, `start_run`.

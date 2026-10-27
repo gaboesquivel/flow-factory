@@ -460,6 +460,30 @@ export const createStore = (db: DatabaseSync) => {
     );
   };
 
+  const clearRunWorktree = ({ runId }: { runId: string }) => {
+    db.prepare("UPDATE runs SET worktree_path = NULL, branch_name = NULL WHERE id = ?").run(runId);
+  };
+
+  const listRunsForTask = (taskId: string, limit = 10): RunRecord[] => {
+    const rows = db
+      .prepare("SELECT * FROM runs WHERE task_id = ? ORDER BY created_at DESC LIMIT ?")
+      .all(taskId, limit) as Record<string, unknown>[];
+    return rows.map((row) => ({
+      id: String(row.id),
+      taskId: String(row.task_id),
+      status: row.status as RunStatus,
+      specialist: row.specialist as SpecialistRole,
+      adapter: row.adapter as RunRecord["adapter"],
+      model: row.model ? String(row.model) : null,
+      worktreePath: row.worktree_path ? String(row.worktree_path) : null,
+      branchName: row.branch_name ? String(row.branch_name) : null,
+      createdAt: String(row.created_at),
+      updatedAt: String(row.updated_at),
+      evidence: row.evidence ? String(row.evidence) : null,
+      error: row.error ? String(row.error) : null,
+    }));
+  };
+
   const approveReviewWithDraftPr = async ({
     runId,
     evidence,
@@ -614,6 +638,8 @@ export const createStore = (db: DatabaseSync) => {
     saveReview,
     approveReviewWithDraftPr,
     setRunWorktree,
+    clearRunWorktree,
+    listRunsForTask,
     getReview,
     rememberIdempotent,
     markRunsUnknownOnRestart,

@@ -7,7 +7,7 @@ import { execFile } from "node:child_process";
 import { parseTaskId } from "@flow-factory/domain";
 
 import type { Store } from "./store.js";
-import { ensureRunWorktree } from "./worktree.js";
+import { cleanupRunWorktree, ensureRunWorktree } from "./worktree.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -102,6 +102,18 @@ export const createCoordinator = ({ store, repoRoot }: { store: Store; repoRoot:
         });
       }
     } finally {
+      const finalRun = store.getRun(runId);
+      if (
+        finalRun?.worktreePath &&
+        (finalRun.status === "failed" || finalRun.status === "cancelled")
+      ) {
+        await cleanupRunWorktree({
+          repoRoot,
+          runId,
+          worktreePath: finalRun.worktreePath,
+        });
+        store.clearRunWorktree({ runId });
+      }
       dispatching = false;
     }
   };

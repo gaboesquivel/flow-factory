@@ -80,6 +80,27 @@ server.registerTool(
 );
 
 server.registerTool(
+  "save_handoff",
+  {
+    description: "Persist task continuity handoff",
+    inputSchema: {
+      taskId: z.string(),
+      summary: z.string(),
+      nextAction: z.string(),
+      context: z.string(),
+    },
+  },
+  async ({ taskId, summary, nextAction, context }) => ({
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(store.saveHandoff({ taskId, summary, nextAction, context }), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
   "start_run",
   {
     description: "Delegate task to cursor or ollama adapter",

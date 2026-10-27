@@ -29,7 +29,19 @@ export default async ({ params }: { params: Promise<{ id: string }> }) => {
       {error ? <p role="alert">Could not load task: {error}</p> : null}
       {payload ? (
         <>
-          <TaskActions taskId={taskId} />
+          <TaskActions
+            taskId={taskId}
+            runId={
+              payload.task && typeof payload.task === "object" && "runId" in payload.task
+                ? (payload.task as { runId: string | null }).runId
+                : null
+            }
+            runStatus={
+              payload.task && typeof payload.task === "object" && "runStatus" in payload.task
+                ? (payload.task as { runStatus: string | null }).runStatus
+                : null
+            }
+          />
           <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
             {JSON.stringify(payload, null, 2)}
           </pre>

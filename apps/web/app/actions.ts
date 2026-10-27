@@ -39,6 +39,21 @@ export const saveHandoffAction = async ({
   return result;
 };
 
+export const draftPrAction = async ({ runId, evidence }: { runId: string; evidence: string }) => {
+  const result = await factoryFetch("/v1/reviews/draft-pr", {
+    method: "POST",
+    body: { runId, evidence, humanAuthorized: true },
+  });
+  return result;
+};
+
+export const discardWorktreeAction = async ({ runId }: { runId: string }) => {
+  const result = await factoryFetch(`/v1/runs/${encodeURIComponent(runId)}/worktree/discard`, {
+    method: "POST",
+  });
+  return result;
+};
+
 export const startRunAction = async ({
   taskId,
   specialist,

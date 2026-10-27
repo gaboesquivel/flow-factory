@@ -2,11 +2,25 @@
 
 import { useState } from "react";
 
-import { claimTask, saveHandoffAction, startRunAction, syncGithub } from "./actions";
+import {
+  claimTask,
+  discardWorktreeAction,
+  draftPrAction,
+  saveHandoffAction,
+  startRunAction,
+  syncGithub,
+} from "./actions";
 
-type Props = { taskId: string };
+type Props = {
+  taskId: string;
+  runId: string | null;
+  runStatus: string | null;
+};
 
-export const TaskActions = ({ taskId }: Props) => {
+const reviewableRun = (status: string | null) =>
+  status === "completed" || status === "awaiting_intervention";
+
+export const TaskActions = ({ taskId, runId, runStatus }: Props) => {
   const [message, setMessage] = useState<string | null>(null);
 
   return (
@@ -58,6 +72,35 @@ export const TaskActions = ({ taskId }: Props) => {
         >
           Sync GitHub
         </button>
+        {runId && reviewableRun(runStatus) ? (
+          <button
+            type="button"
+            onClick={async () => {
+              const result = await draftPrAction({
+                runId,
+                evidence: "Authorized from Flow Factory dashboard",
+              });
+              setMessage(
+                result.ok
+                  ? `Draft PR: ${result.json.draftPrUrl ?? "created"}`
+                  : JSON.stringify(result.json),
+              );
+            }}
+          >
+            Authorize draft PR
+          </button>
+        ) : null}
+        {runId && reviewableRun(runStatus) ? (
+          <button
+            type="button"
+            onClick={async () => {
+              const result = await discardWorktreeAction({ runId });
+              setMessage(result.ok ? "Worktree discarded" : JSON.stringify(result.json));
+            }}
+          >
+            Discard worktree
+          </button>
+        ) : null}
       </div>
       {message ? <p role="status">{message}</p> : null}
     </section>
