@@ -1,5 +1,5 @@
 import { defineAgent } from "eve";
-import { MODELS } from "./lib/models.js";
+import { stationAgentConfig } from "./lib/models.js";
 
 /**
  * Root agent runtime configuration.
@@ -19,5 +19,5 @@ export default defineAgent({
   limits: {
     maxOutputTokensPerSession: 100_000,
   },
-  model: MODELS.orchestrator,
+  ...stationAgentConfig("orchestrator"),
 });

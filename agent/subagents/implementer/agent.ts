@@ -1,5 +1,5 @@
 import { defineAgent } from "eve";
-import { MODELS } from "../../lib/models.js";
+import { stationAgentConfig } from "../../lib/models.js";
 
 /**
  * Station 3: implementation.
@@ -27,6 +27,6 @@ export default defineAgent({
     "analysis in the message, plus an artifact id when the analyst saved its full detail " +
     "as one; on a revision run it also passes the existing branch and the reviewer's " +
     "findings.",
-  model: MODELS.implementer,
+  ...stationAgentConfig("implementer"),
   tool: false,
 });

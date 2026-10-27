@@ -1,8 +1,8 @@
 {
-  "name": "eve-software-factory-template",
-  "version": "0.0.0",
+  "name": "flow-factory",
+  "version": "0.1.0",
   "private": true,
-  "description": "Foreman, the eve Software Factory.",
+  "description": "Flow Factory — Eve software factory with Flow Skills methodology.",
   "license": "MIT",
   "type": "module",
   "imports": {
@@ -15,11 +15,14 @@
     "dev": "eve dev",
     "eval": "eve eval",
     "fix": "ultracite fix",
+    "models:check": "node --import tsx scripts/models-check.ts",
     "start": "eve start",
+    "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "tsc",
     "validate": "pnpm run check && pnpm run typecheck && eve info"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^2.0.30",
     "@github-tools/eve-extension": "^0.8.0",
     "@vercel/blob": "^2.8.0",
     "@vercel/connect": "^2.3.3",
@@ -30,6 +33,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@types/node": "~24.19.0",
+    "tsx": "^4.21.0",
     "typescript": "7.0.2",
     "ultracite": "^7.12.1"
   },

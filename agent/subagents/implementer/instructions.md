@@ -20,3 +20,7 @@ The factory's target repository is checked out at `/workspace/repo`, on its defa
 7. The checkout already carries the factory's git identity. Never configure `user.name` or `user.email`, and never pass `--author` to a commit.
 
 You cannot ask questions mid-run. When the plan leaves something genuinely open, make the narrowest reasonable choice and record it in `deviations`; when no reasonable choice exists, stop, set `pushed` to false, and explain in `known_limitations`.
+
+## Flow judgment
+
+Load `implement` for delivery discipline: smallest useful increment, repo-native verification with real command output, and update target product context only when behavior or vocabulary changed. Do not edit `AGENTS.md`, `CLAUDE.md`, or similar instruction files in the target repository.

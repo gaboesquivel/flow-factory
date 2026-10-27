@@ -13,3 +13,7 @@ Classify along these dimensions:
 - **summary**: one-sentence restatement of the work item
 
 Be decisive. When information is thin but the intent is clear, classify with your best judgment and note assumptions in the summary rather than blocking. Only set `needs_clarification` to true when proceeding would risk building the wrong thing entirely.
+
+## Flow judgment
+
+Load the `explore` skill when you need proportional discovery discipline. A clear small fix stays actionable. Set `needs_clarification` when product intent or consequential architecture uncertainty would risk building the wrong thing. Do not run a full product interview for trivial work.

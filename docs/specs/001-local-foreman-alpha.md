@@ -1,5 +1,7 @@
 # 001 — Local Foreman Alpha
 
+> **Historical:** Describes the pre–Eve SQLite coordinator superseded by [003 — Eve / Foreman rewrite](003-eve-foreman-rewrite.md).
+
 **Status:** Alpha complete (local verification; adapters depend on host tooling)  
 **Owner:** Flow Factory
 

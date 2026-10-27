@@ -1,23 +1,15 @@
+/**
+ * Optional Linear channel. Copy to `linear.ts` when `LINEAR_CONNECTOR` is set.
+ *
+ * @see https://github.com/vercel-labs/eve-software-factory-template/blob/main/agent/channels/linear.ts
+ */
 import { connectLinearCredentials } from "@vercel/connect/eve";
 import { defaultLinearAuth, linearChannel } from "eve/channels/linear";
+import { LINEAR_CONNECTOR } from "../lib/linear-auth.js";
 import { stampTrusted } from "../lib/trust.js";
 
-/**
- * Linear channel: Agent Sessions in, Agent Activities out, via Vercel Connect.
- *
- * @remarks
- * Credentials are brokered by Vercel Connect, which supplies the app token and
- * verifies inbound webhooks by their Vercel OIDC signature. The
- * `onAgentSession` hook keeps the default created/prompted dispatch, stamps
- * the caller as trusted (only workspace members can open an Agent Session, so
- * membership is the gate here), and adds the requester's name as session
- * context when Linear provides it, for attribution in progress notes and
- * reports.
- */
 export default linearChannel({
-  credentials: connectLinearCredentials(
-    process.env.LINEAR_CONNECTOR ?? "linear/foreman-agent"
-  ),
+  credentials: connectLinearCredentials(LINEAR_CONNECTOR),
   onAgentSession: (_ctx, event) => {
     if (event.action !== "created" && event.action !== "prompted") {
       return null;

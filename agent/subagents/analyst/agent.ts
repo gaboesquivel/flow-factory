@@ -1,5 +1,5 @@
 import { defineAgent } from "eve";
-import { MODELS } from "../../lib/models.js";
+import { stationAgentConfig } from "../../lib/models.js";
 
 /**
  * Station 2: analysis and planning.
@@ -24,6 +24,6 @@ export default defineAgent({
     "caller passes the work item, its classification, and any research findings in the " +
     "message, plus a research artifact id when the researcher saved a full memo. May " +
     "save its own deep supporting detail as an analysis artifact and return the id.",
-  model: MODELS.analyst,
+  ...stationAgentConfig("analyst"),
   tool: false,
 });
