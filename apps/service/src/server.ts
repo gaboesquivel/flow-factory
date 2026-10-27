@@ -17,7 +17,15 @@ const sendJson = (response: import("node:http").ServerResponse, status: number, 
   response.end(JSON.stringify(body));
 };
 
-export const createHttpServer = ({ store, token }: { store: Store; token: string }) =>
+export const createHttpServer = ({
+  store,
+  token,
+  onMutation,
+}: {
+  store: Store;
+  token: string;
+  onMutation?: () => void;
+}) =>
   createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", `http://${request.headers.host}`);
     const path = url.pathname;
@@ -33,10 +41,12 @@ export const createHttpServer = ({ store, token }: { store: Store; token: string
       return;
     }
 
-    const needsAuth =
-      method !== "GET" ||
-      path.startsWith("/v1/factory/pause") ||
-      path.startsWith("/v1/factory/resume");
+    if (path === "/v1/github/config" && method === "GET") {
+      sendJson(response, 200, { config: store.getGithubConfig() });
+      return;
+    }
+
+    const needsAuth = method !== "GET";
 
     if (needsAuth && !authorizeRequest({ header: request.headers.authorization, token })) {
       sendJson(response, 401, { error: "unauthorized" });
@@ -58,6 +68,7 @@ export const createHttpServer = ({ store, token }: { store: Store; token: string
       sendJson(response, 200, {
         task,
         handoff: store.getHandoff(id),
+        activity: store.listTaskActivity(id),
       });
       return;
     }
@@ -184,6 +195,75 @@ export const createHttpServer = ({ store, token }: { store: Store; token: string
     if (path === "/v1/factory/resume" && method === "POST") {
       store.setPaused(false);
       sendJson(response, 200, { paused: false });
+      return;
+    }
+
+    if (path === "/v1/github/config" && method === "POST") {
+      const body = await readJson(request);
+      const config = store.configureGithub({
+        owner: String(body.owner ?? ""),
+        repo: String(body.repo ?? ""),
+        projectNumber: body.projectNumber ? Number(body.projectNumber) : null,
+        ownerType: body.ownerType as "user" | "organization" | undefined,
+      });
+      sendJson(response, 200, { config });
+      onMutation?.();
+      return;
+    }
+
+    if (path === "/v1/github/sync" && method === "POST") {
+      const result = await store.syncGithub();
+      sendJson(response, result.ok ? 200 : 502, result);
+      onMutation?.();
+      return;
+    }
+
+    if (path.startsWith("/v1/tasks/") && path.endsWith("/update") && method === "POST") {
+      const taskId = decodeURIComponent(path.slice("/v1/tasks/".length, -"/update".length));
+      const body = await readJson(request);
+      const result = store.updateTask({
+        taskId,
+        column: body.column as KanbanColumn | undefined,
+        blocked: body.blocked !== undefined ? Boolean(body.blocked) : undefined,
+        expectedRevision: body.revision !== undefined ? Number(body.revision) : undefined,
+      });
+      sendJson(response, result.ok ? 200 : 409, result);
+      onMutation?.();
+      return;
+    }
+
+    if (path === "/v1/runs/submit-result" && method === "POST") {
+      const body = await readJson(request);
+      const result = store.submitResult({
+        runId: String(body.runId ?? ""),
+        evidence: String(body.evidence ?? ""),
+        verified: Boolean(body.verified),
+      });
+      sendJson(response, result.ok ? 200 : 409, result);
+      onMutation?.();
+      return;
+    }
+
+    if (path === "/v1/reviews" && method === "POST") {
+      const body = await readJson(request);
+      const result = store.saveReview({
+        runId: String(body.runId ?? ""),
+        verdict: body.verdict as "approve" | "reject" | "changes_requested",
+        evidence: String(body.evidence ?? ""),
+        draftPrUrl: body.draftPrUrl ? String(body.draftPrUrl) : null,
+      });
+      sendJson(response, 200, result);
+      return;
+    }
+
+    if (path.startsWith("/v1/reviews/") && method === "GET") {
+      const runId = decodeURIComponent(path.slice("/v1/reviews/".length));
+      const review = store.getReview(runId);
+      if (!review) {
+        sendJson(response, 404, { error: "review_not_found" });
+        return;
+      }
+      sendJson(response, 200, { review });
       return;
     }
 

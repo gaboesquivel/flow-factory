@@ -1,0 +1,35 @@
+import Link from "next/link";
+
+const apiBase = process.env.FLOW_FACTORY_URL ?? "http://127.0.0.1:3747";
+
+export default async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+  const taskId = decodeURIComponent(id);
+  let payload: Record<string, unknown> | null = null;
+  let error: string | null = null;
+
+  try {
+    const response = await fetch(`${apiBase}/v1/tasks/${encodeURIComponent(taskId)}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error(String(response.status));
+    payload = await response.json();
+  } catch (cause) {
+    error = cause instanceof Error ? cause.message : "unavailable";
+  }
+
+  return (
+    <main style={{ padding: "1.5rem", maxWidth: 900, margin: "0 auto" }}>
+      <p>
+        <Link href="/">← Tasks</Link>
+      </p>
+      <h1>Task detail</h1>
+      {error ? <p role="alert">Could not load task: {error}</p> : null}
+      {payload ? (
+        <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
+          {JSON.stringify(payload, null, 2)}
+        </pre>
+      ) : null}
+    </main>
+  );
+};

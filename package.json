@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm --parallel --filter @flow-factory/service --filter @flow-factory/web dev",
     "factory": "pnpm --filter @flow-factory/service start",
+    "factory:mcp": "FLOW_FACTORY_DATA_DIR=.data pnpm --filter @flow-factory/service exec node --import tsx src/mcp-main.ts",
     "test": "pnpm -r test",
     "check-types": "pnpm -r check-types",
     "lint": "oxfmt --check . && oxlint .",

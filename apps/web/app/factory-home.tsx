@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { kanbanColumns, type KanbanColumn } from "@flow-factory/domain";
 
 type Props = {
@@ -82,7 +84,9 @@ export const FactoryHome = ({ status, tasks, error }: Props) => {
                         marginBottom: "0.5rem",
                       }}
                     >
-                      <strong>{task.title}</strong>
+                      <strong>
+                        <Link href={`/tasks/${encodeURIComponent(task.id)}`}>{task.title}</Link>
+                      </strong>
                       <div style={{ fontSize: "0.85rem", color: "#626a65" }}>{task.id}</div>
                       {task.blocked ? <div aria-label="Blocked">Blocked</div> : null}
                       {task.runStatus ? <div>Run: {task.runStatus}</div> : null}

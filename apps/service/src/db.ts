@@ -53,6 +53,20 @@ export const openDatabase = (path: string) => {
       response_json TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS activity (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS review_records (
+      run_id TEXT PRIMARY KEY,
+      verdict TEXT NOT NULL,
+      evidence TEXT NOT NULL,
+      draft_pr_url TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
   return db;
 };
