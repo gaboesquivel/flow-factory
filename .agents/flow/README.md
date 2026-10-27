@@ -38,4 +38,16 @@ You do not need to memorize commands. Describe the work you want to do and colla
 - [Influences and skills](guides/influences.md)
 - [Learning and improvement](guides/improvement.md)
 
+## Commands
+
+Optional Cursor commands. Ordinary work does not load them. Canonical instructions are in `.agents/flow/skills/`.
+
+| Command | Purpose |
+| --- | --- |
+| [`/flow`](skills/flow/SKILL.md) | Spec → Tasks → Build → Review → Ship |
+| [`/f-council`](skills/f-council/SKILL.md) | Independent decision review |
+| [`/f-retro`](skills/f-retro/SKILL.md) | Evidence-based workflow improvement |
+| [`/f-extract`](skills/f-extract/SKILL.md) | Extract reusable starter capabilities |
+| [`/f-yolo`](skills/f-yolo/SKILL.md) | Test, commit, push, deploy, verify |
+
 For exact rules, see [Flow's operational contract](flow.md).

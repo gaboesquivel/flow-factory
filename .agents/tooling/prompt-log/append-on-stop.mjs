@@ -3,7 +3,11 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { repoRoot } from "../lib/repo-paths.mjs";
-import { parseLastTurnFromTranscript } from "./parse-transcript.mjs";
+import {
+  extractExposedModel,
+  extractSlashCommand,
+  parseLastTurnFromTranscript,
+} from "./parse-transcript.mjs";
 import { redactForLog } from "./redact.mjs";
 
 const enabledMarker = "## Local prompt log (enabled)";
@@ -46,25 +50,45 @@ const resolveWorkMeta = (root) => {
   return { stage: "Build", work: "general" };
 };
 
-const buildBlock = ({ timestamp, work, stage, human, agent, generationId }) =>
-  [
+const buildBlock = ({
+  timestamp,
+  work,
+  stage,
+  human,
+  agent,
+  generationId,
+  command,
+  skills,
+  model,
+}) => {
+  const lines = [
     "---",
     `Timestamp: ${timestamp}`,
     `Work: ${work}`,
     `Stage: ${stage}`,
     `Generation: ${generationId}`,
+  ];
+  if (command) lines.push(`Command: ${command}`);
+  if (skills?.length) lines.push(`Skills: ${skills.join(", ")}`);
+  if (model) lines.push(`Model: ${model}`);
+  lines.push(
     "",
     `Human: ${redactForLog(human)}`,
     "",
     `Agent: ${redactForLog(agent)}`,
     "",
     "---",
-    "",
-  ].join("\n");
+    ""
+  );
+  return lines.join("\n");
+};
 
-const resolveHumanAndAgent = ({ hookInput, pending, generationId }) => {
+const resolveTurn = ({ hookInput, pending, generationId }) => {
   let human = pending?.generationId === generationId ? pending.human : "";
   let agent = "";
+  let command = null;
+  let skills = [];
+  let model = null;
 
   const transcriptPath = hookInput?.transcript_path;
   if (transcriptPath && existsSync(transcriptPath)) {
@@ -72,11 +96,21 @@ const resolveHumanAndAgent = ({ hookInput, pending, generationId }) => {
     if (turn) {
       human ||= turn.human;
       agent = turn.agent;
+      command = turn.command;
+      skills = turn.skills ?? [];
+      model = turn.model;
     }
   }
 
   human ||= pending?.human ?? "";
-  return { agent, human };
+  if (!command && human) command = extractSlashCommand(human);
+  model = extractExposedModel([
+    hookInput?.model,
+    hookInput?.model_id,
+    hookInput?.modelId,
+    model,
+  ]);
+  return { agent, command, human, model, skills };
 };
 
 export const appendPromptLogOnStop = ({
@@ -96,7 +130,7 @@ export const appendPromptLogOnStop = ({
 
   const pendingPath = path.join(root, pendingRel);
   const pending = readJson(pendingPath);
-  const { agent, human } = resolveHumanAndAgent({
+  const { agent, command, human, model, skills } = resolveTurn({
     generationId,
     hookInput,
     pending,
@@ -108,8 +142,11 @@ export const appendPromptLogOnStop = ({
   const prior = existsSync(logPath) ? readFileSync(logPath, "utf-8") : "";
   const block = buildBlock({
     agent: agent || "(hook: awaiting coordinator summary)",
+    command,
     generationId,
     human,
+    model,
+    skills,
     stage,
     timestamp: now().toISOString(),
     work,

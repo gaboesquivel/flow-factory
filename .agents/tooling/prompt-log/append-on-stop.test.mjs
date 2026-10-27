@@ -100,6 +100,72 @@ test("appendPromptLogOnStop appends one block and dedupes generation", () => {
 
   const second = appendPromptLogOnStop({ hookInput, root: dir });
   assert.equal(second.skipped, "duplicate-generation");
+  assert.doesNotMatch(log, /^Command:/mu);
+  assert.doesNotMatch(log, /^Model:/mu);
+  assert.doesNotMatch(log, /^Skills:/mu);
+
+  rmSync(dir, { force: true, recursive: true });
+});
+
+test("append records slash command, loaded skills, and exposed model only", () => {
+  const dir = mkdtempSync(join(tmpdir(), "flow-prompt-stop-"));
+  seedEnabledRepo(dir);
+
+  const transcript = join(dir, "transcript.jsonl");
+  writeFileSync(
+    transcript,
+    [
+      JSON.stringify({
+        message: {
+          content: [
+            {
+              text: "<user_query>/f-council quick GitHub Issues or local tasks?</user_query>",
+              type: "text",
+            },
+          ],
+        },
+        role: "user",
+      }),
+      JSON.stringify({
+        message: {
+          content: [
+            {
+              text: [
+                "**Task report** — Completed",
+                "",
+                "Advisory only.",
+                "",
+                "**Skills loaded**",
+                "",
+                "- Flow: `f-council`",
+                "- Others: None",
+              ].join("\n"),
+              type: "text",
+            },
+          ],
+          model: "example-model",
+        },
+        role: "assistant",
+      }),
+    ].join("\n"),
+    "utf-8"
+  );
+
+  appendPromptLogOnStop({
+    hookInput: {
+      generation_id: "gen-flow",
+      model_id: "hook-model",
+      transcript_path: transcript,
+    },
+    now: () => new Date("2026-10-26T12:00:00.000Z"),
+    root: dir,
+  });
+
+  const log = readFileSync(join(dir, "prompts.txt"), "utf-8");
+  assert.match(log, /Command: \/f-council/u);
+  assert.match(log, /Skills: f-council/u);
+  assert.match(log, /Model: hook-model/u);
+  assert.doesNotMatch(log, /Subagents:/u);
 
   rmSync(dir, { force: true, recursive: true });
 });

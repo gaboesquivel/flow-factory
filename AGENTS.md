@@ -17,6 +17,35 @@ Short pointers for coding agents on branch **`simple`**.
 
 **Matt workflow:** Install and invoke skills per [README — Matt Pocock workflow](README.md#matt-pocock-workflow). Use native skill conventions; verify files on disk after `pnpm --dir .agents skills:install`.
 
+## Flow commands
+
+Flow's reusable commands are defined under
+`.agents/flow/skills/` and exposed to Cursor through
+`.cursor/commands/`.
+
+| Command | Purpose |
+| --- | --- |
+| `/flow` | Spec → Tasks → Build → Review → Ship |
+| `/f-council` | Independent decision review |
+| `/f-retro` | Evidence-based workflow improvement |
+| `/f-extract` | Extract reusable starter capabilities |
+| `/f-yolo` | Test, commit, push, deploy, verify |
+
+When invoked, read the corresponding canonical SKILL.md.
+
+These commands are optional and do not replace the
+existing Matt workflow for unrelated tasks.
+
+Keep factory instructions under `.agents/flow/`.
+
+For new consequential decisions made through Flow, use
+numbered Decisions instead of creating new ADRs.
+Preserve historical ADRs unless migration is explicitly
+authorized.
+
+Use the existing task report and prompt logging conventions.
+Never claim a skill was loaded without reading its instructions.
+
 ## Product code
 
 - `apps/web` — Next.js studio, MCP, GenUI API

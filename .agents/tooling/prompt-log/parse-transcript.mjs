@@ -1,5 +1,40 @@
 import { readFileSync } from "node:fs";
 
+export const extractSlashCommand = (human) => {
+  const token = human.trim().split(/\s+/u)[0] ?? "";
+  if (!/^\/[a-z0-9][a-z0-9-]*$/iu.test(token)) return null;
+  return token.toLowerCase();
+};
+
+export const extractSkillsLoaded = (text) => {
+  const marker = "**Skills loaded**";
+  const index = text.indexOf(marker);
+  if (index === -1) return [];
+  const names = [];
+  for (const match of text
+    .slice(index + marker.length)
+    .matchAll(/`([^`\n]+)`/gu)) {
+    const name = match[1].trim();
+    if (name && name.toLowerCase() !== "none") names.push(name);
+  }
+  return [...new Set(names)];
+};
+
+const modelString = (value) => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed || /[\r\n]/u.test(trimmed) || trimmed.length > 120) return null;
+  return trimmed;
+};
+
+export const extractExposedModel = (sources) => {
+  for (const source of sources) {
+    const model = modelString(source);
+    if (model) return model;
+  }
+  return null;
+};
+
 const extractUserQuery = (text) => {
   const match = text.match(/<user_query>\s*([\s\S]*?)\s*<\/user_query>/u);
   const raw = match ? match[1].trim() : text.trim();
@@ -42,6 +77,7 @@ export const parseLastTurnFromTranscript = (transcriptPath) => {
 
   let lastUser = "";
   let lastAssistant = "";
+  let model = null;
   for (const line of lines) {
     let row;
     try {
@@ -50,6 +86,8 @@ export const parseLastTurnFromTranscript = (transcriptPath) => {
       continue;
     }
     if (row.type === "turn_ended") continue;
+    const exposed = extractExposedModel([row.model, row.message?.model]);
+    if (exposed) model = exposed;
     if (row.role === "user") {
       const text = textFromMessage(row.message);
       if (text) lastUser = extractUserQuery(text);
@@ -65,6 +103,9 @@ export const parseLastTurnFromTranscript = (transcriptPath) => {
     agent: summarizeAgent(
       lastAssistant || "(hook: no assistant text in transcript)"
     ),
+    command: extractSlashCommand(lastUser),
     human: lastUser,
+    model,
+    skills: extractSkillsLoaded(lastAssistant),
   };
 };

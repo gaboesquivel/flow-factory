@@ -70,6 +70,22 @@ When the human’s message answers the prior **Q:**, start the block with **A:**
 
 Redact secrets (tokens, keys, env secrets) before writing.
 
+## Flow command metadata
+
+The stop hook adds these lines only when the turn actually contains them:
+
+| Line | Source |
+| --- | --- |
+| `Command:` | First token of the human text when it is a slash command such as `/flow` |
+| `Skills:` | Names in a **Skills loaded** footer in the assistant transcript |
+| `Model:` | A model identifier exposed on the hook payload (`model`, `model_id`, `modelId`) or transcript row |
+
+Do not infer skills from the catalog. Do not invent a model id. Cursor transcripts observed in this repository expose `role`, `message`, `type`, and `status` only, so `Model:` stays absent unless the runtime adds one of those fields.
+
+Subagent return reports live in separate transcripts. The parent stop hook does not receive them. Workers and subagents still must not append to `prompts.txt`. The hook does not write subagent metadata it did not observe. The coordinator records observed subagent outcomes in the Task report.
+
+These commands do not enable the prompt log. Hooks still no-op unless `## Local prompt log (enabled)` is present. The stop hook remains the only automatic writer, so concurrent workers do not append the shared log.
+
 Do not erase or rewrite earlier entries. Do not fabricate timestamps, commits, subagent work, or verification.
 
 ## AGENTS.md enabled block
