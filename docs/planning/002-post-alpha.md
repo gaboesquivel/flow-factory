@@ -11,10 +11,10 @@ Harden the local factory for daily use: CI parity, issue-backed backlog, and sma
 
 | ID   | Package              | Outcome                                                       |
 | ---- | -------------------- | ------------------------------------------------------------- |
-| P2.1 | CI on `main`         | `check-types`, `test`, `test:browser` in GitHub Actions       |
-| P2.2 | Issue-backed backlog | Track Beta items as `gaboesquivel/flow-factory` issues        |
-| P2.3 | Dashboard polish     | Settings (GitHub config), run list, release claim from UI     |
-| P2.4 | MCP parity           | `update_task_column`, handoff read paths documented in README |
+| P2.1 | CI on `main`         | Done — `.github/workflows/ci.yml`                             |
+| P2.2 | Issue-backed backlog | Open GitHub issues for P2.3–P2.5                              |
+| P2.3 | Dashboard polish     | In progress — `/settings` read-only; run list, release claim    |
+| P2.4 | MCP parity           | Done — `update_task_column`; document handoff in README        |
 | P2.5 | Release              | Tag `v0.1.0-alpha` after CI green                             |
 
 ## Verification (Flow)
