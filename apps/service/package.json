@@ -1,0 +1,20 @@
+{
+  "name": "@flow-factory/service",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx --watch src/main.ts",
+    "start": "node --import tsx src/main.ts",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@flow-factory/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.20.5",
+    "typescript": "^7.0.2"
+  }
+}

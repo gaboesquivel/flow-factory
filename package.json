@@ -1,0 +1,19 @@
+{
+  "name": "flow-factory",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @flow-factory/service --filter @flow-factory/web dev",
+    "factory": "pnpm --filter @flow-factory/service start",
+    "test": "pnpm -r test",
+    "check-types": "pnpm -r check-types",
+    "lint": "oxfmt --check . && oxlint .",
+    "lint:fix": "oxfmt --write . && oxlint --fix ."
+  },
+  "devDependencies": {
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "typescript": "^7.0.2"
+  },
+  "packageManager": "pnpm@10.14.0"
+}
