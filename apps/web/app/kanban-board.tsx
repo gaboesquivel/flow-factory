@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { kanbanColumns, type KanbanColumn } from "@flow-factory/domain";
 
@@ -27,26 +27,38 @@ const columnLabel: Record<KanbanColumn, string> = {
 
 export const KanbanBoard = ({ tasks }: { tasks: TaskCard[] }) => {
   const router = useRouter();
+  const [localTasks, setLocalTasks] = useState(tasks);
   const [dragTaskId, setDragTaskId] = useState<string | null>(null);
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
 
   const byColumn = kanbanColumns.map((column) => ({
     column,
-    tasks: tasks.filter((task) => task.column === column),
+    tasks: localTasks.filter((task) => task.column === column),
   }));
 
   const dropOnColumn = async (column: KanbanColumn) => {
     if (!dragTaskId) return;
-    const task = tasks.find((item) => item.id === dragTaskId);
+    const task = localTasks.find((item) => item.id === dragTaskId);
     if (!task || task.column === column) {
       setDragTaskId(null);
       return;
     }
+    const previous = localTasks;
+    setLocalTasks(localTasks.map((item) => (item.id === dragTaskId ? { ...item, column } : item)));
+    setPendingTaskId(dragTaskId);
+    setDragTaskId(null);
+
     const result = await moveTaskColumn({ taskId: dragTaskId, column });
+    if (!result.ok) setLocalTasks(previous);
     setMessage(
       result.ok ? `Moved to ${columnLabel[column]}` : `Move failed: ${JSON.stringify(result.json)}`,
     );
-    setDragTaskId(null);
+    setPendingTaskId(null);
     router.refresh();
   };
 
@@ -89,7 +101,8 @@ export const KanbanBoard = ({ tasks }: { tasks: TaskCard[] }) => {
                     borderRadius: 8,
                     padding: "0.75rem",
                     marginBottom: "0.5rem",
-                    cursor: "grab",
+                    cursor: pendingTaskId === task.id ? "wait" : "grab",
+                    opacity: pendingTaskId === task.id ? 0.65 : 1,
                   }}
                 >
                   <strong>
