@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "FLOW_FACTORY_DATA_DIR=../../.data node --import tsx --watch src/main.ts",
     "start": "FLOW_FACTORY_DATA_DIR=../../.data node --import tsx src/main.ts",
+    "mcp": "FLOW_FACTORY_DATA_DIR=../../.data node --import tsx src/mcp-main.ts",
     "test": "node --import tsx --test tests/**/*.test.ts",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@flow-factory/domain": "workspace:*"
+    "@flow-factory/domain": "workspace:*",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

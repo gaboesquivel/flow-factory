@@ -14,6 +14,11 @@ import {
 
 import { getMeta, setMeta } from "./db.js";
 import { probeCursor, probeOllama } from "./adapters.js";
+import { listActivity, logActivity } from "./activity.js";
+import { defaultGithubConfig } from "./github/config.js";
+import { probeGhAuth } from "./github/gh.js";
+import { syncGithubIssues } from "./github/sync.js";
+import type { GithubConfig } from "./github/types.js";
 
 const parseJson = <T>(value: string, fallback: T): T => {
   try {
@@ -44,19 +49,63 @@ export const createStore = (db: DatabaseSync) => {
 
   const setPaused = (paused: boolean) => setMeta(db, "paused", String(paused));
 
+  const getGithubConfig = (): GithubConfig | null => {
+    const raw = getMeta(db, "github_config");
+    return raw ? (JSON.parse(raw) as GithubConfig) : null;
+  };
+
+  const setGithubConfig = (config: GithubConfig) => {
+    setMeta(db, "github_config", JSON.stringify(config));
+    setMeta(db, "github_repo", `${config.owner}/${config.repo}`);
+    setMeta(db, "github_error", "");
+  };
+
   const getFactoryStatus = async (): Promise<FactoryStatus> => {
-    const [cursor, ollama] = await Promise.all([probeCursor(), probeOllama()]);
+    const [cursor, ollama, gh] = await Promise.all([probeCursor(), probeOllama(), probeGhAuth()]);
     const githubError = getMeta(db, "github_error");
     const githubRepo = getMeta(db, "github_repo");
+    const ghMessage = !gh.ok ? gh.error : githubError;
     return {
       paused: isPaused(),
       github: {
-        connected: Boolean(githubRepo) && !githubError,
-        error: githubError,
+        connected: Boolean(githubRepo) && gh.ok && !githubError,
+        error: ghMessage,
       },
       adapters: { cursor, ollama },
     };
   };
+
+  const syncGithub = async () => {
+    const config = getGithubConfig();
+    if (!config) {
+      setMeta(db, "github_error", "github_not_configured");
+      return { ok: false as const, error: "github_not_configured" };
+    }
+    try {
+      const result = await syncGithubIssues(config);
+      setMeta(db, "github_repo", result.repo);
+      setMeta(db, "github_error", result.projectError ?? "");
+      for (const incoming of result.tasks) {
+        const existing = getTask(incoming.id);
+        upsertTask({
+          ...incoming,
+          revision: existing?.revision ?? 1,
+          assignee: existing?.assignee ?? incoming.assignee,
+          activeSpecialist: existing?.activeSpecialist ?? null,
+          runId: existing?.runId ?? null,
+          runStatus: existing?.runStatus ?? null,
+        });
+      }
+      return { ok: true as const, count: result.tasks.length, projectError: result.projectError };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "sync_failed";
+      setMeta(db, "github_error", message);
+      return { ok: false as const, error: message };
+    }
+  };
+
+  const logTaskActivity = (taskId: string, kind: string, payload: Record<string, unknown>) =>
+    logActivity({ db, taskId, kind, payload });
 
   const listTasks = (): TaskRecord[] => {
     const rows = db.prepare("SELECT * FROM tasks ORDER BY id").all() as Record<string, unknown>[];
@@ -140,6 +189,7 @@ export const createStore = (db: DatabaseSync) => {
       assignee: holder,
       revision: task.revision + 1,
     });
+    logTaskActivity(taskId, "claimed", { holder });
     return { ok: true as const, task: updated };
   };
 
@@ -203,6 +253,7 @@ export const createStore = (db: DatabaseSync) => {
          updated_at = excluded.updated_at,
          revision = excluded.revision`,
     ).run(taskId, summary, nextAction, context, updatedAt, revision);
+    logTaskActivity(taskId, "handoff_saved", { revision });
     return {
       ok: true as const,
       handoff: {
@@ -291,13 +342,120 @@ export const createStore = (db: DatabaseSync) => {
     ).run(id, taskId, status, specialist, adapter, model, now, now);
 
     const run = getRun(id)!;
+    const task = getTask(taskId);
+    if (task) {
+      upsertTask({
+        ...task,
+        runId: id,
+        runStatus: status,
+        revision: task.revision,
+      });
+    }
     const payload = { run, duplicate: false };
     db.prepare("INSERT INTO idempotency (key, response_json, created_at) VALUES (?, ?, ?)").run(
       idempotencyKey,
       JSON.stringify(payload),
       now,
     );
+    logTaskActivity(taskId, "run_started", { runId: id, adapter });
     return payload;
+  };
+
+  const takeQueuedRun = () => {
+    const row = db
+      .prepare("SELECT id FROM runs WHERE status = 'queued' ORDER BY created_at ASC LIMIT 1")
+      .get() as { id: string } | undefined;
+    if (!row) return null;
+    updateRunStatus({ runId: row.id, status: "preparing" });
+    return getRun(row.id);
+  };
+
+  const updateTask = ({
+    taskId,
+    column,
+    blocked,
+    expectedRevision,
+  }: {
+    taskId: string;
+    column?: KanbanColumn;
+    blocked?: boolean;
+    expectedRevision?: number;
+  }) => {
+    const task = getTask(taskId);
+    if (!task) return { ok: false as const, error: "task_not_found" };
+    if (expectedRevision !== undefined && task.revision !== expectedRevision) {
+      return { ok: false as const, error: "revision_conflict", task };
+    }
+    const updated = upsertTask({
+      ...task,
+      column: column ?? task.column,
+      blocked: blocked ?? task.blocked,
+      revision: task.revision + 1,
+    });
+    logTaskActivity(taskId, "task_updated", { column: updated.column });
+    return { ok: true as const, task: updated };
+  };
+
+  const submitResult = ({
+    runId,
+    evidence,
+    verified,
+  }: {
+    runId: string;
+    evidence: string;
+    verified: boolean;
+  }) => {
+    const run = getRun(runId);
+    if (!run) return { ok: false as const, error: "run_not_found" };
+    if (run.status === "cancelled") return { ok: false as const, error: "run_cancelled" };
+    const status = verified ? "completed" : "awaiting_intervention";
+    const updated = updateRunStatus({ runId, status, evidence });
+    if (!updated) return { ok: false as const, error: "invalid_transition" };
+    logTaskActivity(run.taskId, "result_submitted", { runId, verified });
+    return { ok: true as const, run: updated };
+  };
+
+  const saveReview = ({
+    runId,
+    verdict,
+    evidence,
+    draftPrUrl,
+  }: {
+    runId: string;
+    verdict: "approve" | "reject" | "changes_requested";
+    evidence: string;
+    draftPrUrl?: string | null;
+  }) => {
+    db.prepare(
+      `INSERT INTO review_records (run_id, verdict, evidence, draft_pr_url, created_at)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(run_id) DO UPDATE SET
+         verdict = excluded.verdict,
+         evidence = excluded.evidence,
+         draft_pr_url = excluded.draft_pr_url,
+         created_at = excluded.created_at`,
+    ).run(runId, verdict, evidence, draftPrUrl ?? null, new Date().toISOString());
+    const run = getRun(runId);
+    if (run) logTaskActivity(run.taskId, "review_recorded", { runId, verdict });
+    return { ok: true as const };
+  };
+
+  const getReview = (runId: string) => {
+    const row = db
+      .prepare(
+        "SELECT verdict, evidence, draft_pr_url, created_at FROM review_records WHERE run_id = ?",
+      )
+      .get(runId) as
+      | { verdict: string; evidence: string; draft_pr_url: string | null; created_at: string }
+      | undefined;
+    if (!row) return null;
+    return {
+      runId,
+      verdict: row.verdict,
+      evidence: row.evidence,
+      draftPrUrl: row.draft_pr_url,
+      createdAt: row.created_at,
+    };
   };
 
   const updateRunStatus = ({
@@ -339,19 +497,49 @@ export const createStore = (db: DatabaseSync) => {
     isPaused,
     setPaused,
     getFactoryStatus,
+    getGithubConfig,
+    setGithubConfig,
+    configureGithub: ({
+      owner,
+      repo,
+      projectNumber,
+      ownerType,
+    }: {
+      owner: string;
+      repo: string;
+      projectNumber?: number | null;
+      ownerType?: GithubConfig["ownerType"];
+    }) => {
+      const config = defaultGithubConfig({
+        owner,
+        repo,
+        ownerType: ownerType ?? "user",
+        projectNumber: projectNumber ?? null,
+      });
+      setGithubConfig(config);
+      return config;
+    },
+    syncGithub,
     listTasks,
     getTask,
     upsertTask,
+    updateTask,
     claimTask,
     releaseTask,
     saveHandoff,
     getHandoff,
+    listTaskActivity: (taskId: string) => listActivity(db, taskId),
     getRun,
     startRun,
+    takeQueuedRun,
     updateRunStatus,
     cancelRun,
+    submitResult,
+    saveReview,
+    getReview,
     rememberIdempotent,
     markRunsUnknownOnRestart,
+    logTaskActivity,
     setGithubError: (message: string | null) => setMeta(db, "github_error", message ?? ""),
     setGithubRepo: (repo: string | null) => setMeta(db, "github_repo", repo ?? ""),
   };

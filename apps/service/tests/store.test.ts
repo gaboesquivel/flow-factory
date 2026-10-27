@@ -69,3 +69,34 @@ test("concurrent claims allow one holder", () => {
   assert.equal(b.ok, false);
   if (!b.ok) assert.equal(b.error, "already_claimed");
 });
+
+test("cancelled run rejects verified submit_result", () => {
+  const dir = mkdtempSync(join(tmpdir(), "factory-"));
+  const db = openDatabase(join(dir, "test.db"));
+  const store = createStore(db);
+  store.upsertTask({
+    id: "gaboesquivel/flow-factory#3",
+    title: "Cancel",
+    body: "",
+    column: "ready",
+    blocked: false,
+    priority: null,
+    assignee: null,
+    activeSpecialist: null,
+    acceptanceCriteria: [],
+    runId: null,
+    runStatus: null,
+    syncError: null,
+  });
+  const { run } = store.startRun({
+    taskId: "gaboesquivel/flow-factory#3",
+    specialist: "dev",
+    adapter: "cursor",
+    model: null,
+    idempotencyKey: "cancel-1",
+  });
+  store.cancelRun(run.id);
+  const result = store.submitResult({ runId: run.id, evidence: "late", verified: true });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.error, "run_cancelled");
+});

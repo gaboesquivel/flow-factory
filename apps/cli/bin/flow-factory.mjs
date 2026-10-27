@@ -39,7 +39,48 @@ if (command === "status") {
   console.log(JSON.stringify(await request("/v1/tasks"), null, 2));
 } else if (command === "task" && args[0]) {
   console.log(JSON.stringify(await request(`/v1/tasks/${encodeURIComponent(args[0])}`), null, 2));
+} else if (command === "sync") {
+  console.log(JSON.stringify(await request("/v1/github/sync", { method: "POST" }), null, 2));
+} else if (command === "configure" && args[0] && args[1]) {
+  console.log(
+    JSON.stringify(
+      await request("/v1/github/config", {
+        method: "POST",
+        body: { owner: args[0], repo: args[1], projectNumber: args[2] ? Number(args[2]) : null },
+      }),
+      null,
+      2,
+    ),
+  );
+} else if (command === "claim" && args[0] && args[1]) {
+  console.log(
+    JSON.stringify(
+      await request(`/v1/tasks/${encodeURIComponent(args[0])}/claim`, {
+        method: "POST",
+        body: { holder: args[1] },
+      }),
+      null,
+      2,
+    ),
+  );
+} else if (command === "handoff" && args[0]) {
+  console.log(
+    JSON.stringify(
+      await request(`/v1/tasks/${encodeURIComponent(args[0])}/handoff`, {
+        method: "POST",
+        body: {
+          summary: args[1] ?? "",
+          nextAction: args[2] ?? "",
+          context: args[3] ?? "",
+        },
+      }),
+      null,
+      2,
+    ),
+  );
 } else {
-  console.log(`Usage: flow-factory <status|tasks|task <id>>`);
+  console.log(
+    "Usage: flow-factory <status|tasks|task <id>|sync|configure <owner> <repo> [project#]|claim <id> <holder>|handoff <id> [summary] [next] [context]>",
+  );
   process.exit(1);
 }
