@@ -1,6 +1,9 @@
 import Link from "next/link";
 
+import type { RunRecord } from "@flow-factory/domain";
+
 import { TaskActions } from "../../task-actions";
+import { TaskRuns } from "../../task-runs";
 
 const apiBase = process.env.FLOW_FACTORY_URL ?? "http://127.0.0.1:3747";
 
@@ -42,9 +45,13 @@ export default async ({ params }: { params: Promise<{ id: string }> }) => {
                 : null
             }
           />
-          <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
-            {JSON.stringify(payload, null, 2)}
-          </pre>
+          <TaskRuns runs={Array.isArray(payload.runs) ? (payload.runs as RunRecord[]) : []} />
+          <details style={{ marginTop: "1rem" }}>
+            <summary>Raw task JSON</summary>
+            <pre style={{ background: "#fff", padding: "1rem", borderRadius: 8, overflow: "auto" }}>
+              {JSON.stringify(payload, null, 2)}
+            </pre>
+          </details>
         </>
       ) : null}
     </main>

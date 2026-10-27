@@ -6,6 +6,7 @@ import { kanbanColumns, type KanbanColumn } from "@flow-factory/domain";
 
 import {
   claimTask,
+  releaseTask,
   discardWorktreeAction,
   draftPrAction,
   moveTaskColumn,
@@ -63,6 +64,16 @@ export const TaskActions = ({ taskId, runId, runStatus }: Props) => {
           }}
         >
           Work here
+        </button>
+        <button
+          type="button"
+          data-testid="release-claim"
+          onClick={async () => {
+            const result = await releaseTask({ taskId, holder: "dashboard" });
+            setMessage(result.ok ? "Claim released" : JSON.stringify(result.json));
+          }}
+        >
+          Release claim
         </button>
         <button
           type="button"

@@ -28,6 +28,16 @@ export const syncGithub = async () => {
   return result;
 };
 
+export const releaseTask = async ({ taskId, holder }: { taskId: string; holder: string }) => {
+  const result = await factoryFetch(`/v1/tasks/${encodeURIComponent(taskId)}/release`, {
+    method: "POST",
+    body: { holder },
+  });
+  revalidatePath("/");
+  revalidatePath(`/tasks/${encodeURIComponent(taskId)}`);
+  return result;
+};
+
 export const claimTask = async ({ taskId, holder }: { taskId: string; holder: string }) => {
   const result = await factoryFetch(`/v1/tasks/${encodeURIComponent(taskId)}/claim`, {
     method: "POST",

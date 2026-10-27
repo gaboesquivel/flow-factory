@@ -9,13 +9,13 @@ Harden the local factory for daily use: CI parity, issue-backed backlog, and sma
 
 ## Work packages
 
-| ID   | Package              | Outcome                                                       |
-| ---- | -------------------- | ------------------------------------------------------------- |
-| P2.1 | CI on `main`         | Done — `.github/workflows/ci.yml`                             |
-| P2.2 | Issue-backed backlog | Open GitHub issues for P2.3–P2.5                              |
-| P2.3 | Dashboard polish     | In progress — `/settings` read-only; run list, release claim    |
-| P2.4 | MCP parity           | Done — `update_task_column`; document handoff in README        |
-| P2.5 | Release              | Tag `v0.1.0-alpha` after CI green                             |
+| ID   | Package              | Outcome                                                      |
+| ---- | -------------------- | ------------------------------------------------------------ |
+| P2.1 | CI on `main`         | Done — `.github/workflows/ci.yml`                            |
+| P2.2 | Issue-backed backlog | Open GitHub issues for P2.3–P2.5                             |
+| P2.3 | Dashboard polish     | In progress — `/settings` read-only; run list, release claim |
+| P2.4 | MCP parity           | Done — `update_task_column`; document handoff in README      |
+| P2.5 | Release              | Tag `v0.1.0-alpha` after CI green                            |
 
 ## Verification (Flow)
 
