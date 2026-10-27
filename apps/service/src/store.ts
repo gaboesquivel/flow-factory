@@ -464,6 +464,25 @@ export const createStore = (db: DatabaseSync) => {
     db.prepare("UPDATE runs SET worktree_path = NULL, branch_name = NULL WHERE id = ?").run(runId);
   };
 
+  const listActiveWorktreeRunIds = (): string[] => {
+    const rows = db.prepare("SELECT id FROM runs WHERE worktree_path IS NOT NULL").all() as {
+      id: string;
+    }[];
+    return rows.map((row) => row.id);
+  };
+
+  const setTaskSyncError = ({
+    taskId,
+    syncError,
+  }: {
+    taskId: string;
+    syncError: string | null;
+  }) => {
+    const task = getTask(taskId);
+    if (!task) return;
+    upsertTask({ ...task, syncError, revision: task.revision });
+  };
+
   const listRunsForTask = (taskId: string, limit = 10): RunRecord[] => {
     const rows = db
       .prepare("SELECT * FROM runs WHERE task_id = ? ORDER BY created_at DESC LIMIT ?")
@@ -639,6 +658,8 @@ export const createStore = (db: DatabaseSync) => {
     approveReviewWithDraftPr,
     setRunWorktree,
     clearRunWorktree,
+    listActiveWorktreeRunIds,
+    setTaskSyncError,
     listRunsForTask,
     getReview,
     rememberIdempotent,

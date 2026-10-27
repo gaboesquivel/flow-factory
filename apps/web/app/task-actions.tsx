@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 
+import { kanbanColumns, type KanbanColumn } from "@flow-factory/domain";
+
 import {
   claimTask,
   discardWorktreeAction,
   draftPrAction,
+  moveTaskColumn,
   saveHandoffAction,
   startRunAction,
   syncGithub,
@@ -26,6 +29,31 @@ export const TaskActions = ({ taskId, runId, runStatus }: Props) => {
   return (
     <section aria-label="Task actions" style={{ marginTop: "1rem" }}>
       <h2>Actions</h2>
+      <label style={{ display: "block", marginBottom: "0.75rem" }}>
+        Kanban column
+        <select
+          style={{ display: "block", marginTop: "0.25rem", minWidth: 200 }}
+          defaultValue=""
+          onChange={async (event) => {
+            const column = event.target.value as KanbanColumn;
+            if (!column) return;
+            const result = await moveTaskColumn({ taskId, column });
+            setMessage(
+              result.ok
+                ? `Moved to ${column}${result.json.github ? ` (${JSON.stringify(result.json.github)})` : ""}`
+                : JSON.stringify(result.json),
+            );
+            event.target.value = "";
+          }}
+        >
+          <option value="">Move to…</option>
+          {kanbanColumns.map((column) => (
+            <option key={column} value={column}>
+              {column}
+            </option>
+          ))}
+        </select>
+      </label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
         <button
           type="button"

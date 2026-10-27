@@ -26,7 +26,7 @@ node apps/cli/bin/flow-factory.mjs configure gaboesquivel flow-factory
 node apps/cli/bin/flow-factory.mjs sync
 node apps/cli/bin/flow-factory.mjs task 'gaboesquivel/flow-factory#4'
 node apps/cli/bin/flow-factory.mjs claim 'gaboesquivel/flow-factory#4' cursor
-pnpm factory:mcp   # MCP: list_tasks, get_task, sync_github, claim_task, save_handoff, start_run
+pnpm factory:mcp   # MCP: list/get tasks, sync, claim/release, handoff, start_run, submit_result
 ```
 
 Bearer token: `.data/local.token` (created on first service start).

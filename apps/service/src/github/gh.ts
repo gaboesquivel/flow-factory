@@ -11,6 +11,26 @@ export const ghApiJson = async <T>(endpoint: string): Promise<T> => {
   return JSON.parse(stdout) as T;
 };
 
+export const ghApiPatch = async (endpoint: string, body: Record<string, unknown>) => {
+  const args = ["api", "-X", "PATCH", endpoint, "--input", "-"];
+  const child = spawn("gh", args, { stdio: ["pipe", "pipe", "pipe"] });
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk;
+  });
+  const exitCode = await new Promise<number>((resolve) => {
+    child.on("close", (code) => resolve(code ?? 1));
+    child.stdin.end(JSON.stringify(body));
+  });
+  if (exitCode !== 0) throw new Error(stderr || stdout || `gh api patch exit ${exitCode}`);
+  if (!stdout.trim()) return null;
+  return JSON.parse(stdout) as unknown;
+};
+
 export const ghGraphql = async <T>(query: string, variables: Record<string, unknown>) =>
   new Promise<T>((resolve, reject) => {
     const child = spawn("gh", ["api", "graphql"], { stdio: ["pipe", "pipe", "pipe"] });

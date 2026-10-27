@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { parseAcceptanceCriteria } from "../src/github/parse.js";
-import { mapProjectStatusToColumn } from "../src/github/map.js";
+import { columnToProjectStatusName, mapProjectStatusToColumn } from "../src/github/map.js";
 import { defaultGithubConfig } from "../src/github/config.js";
 
 test("parse acceptance criteria section", () => {
@@ -24,4 +24,5 @@ test("map project status names to columns", () => {
     }),
     "ready",
   );
+  assert.equal(columnToProjectStatusName({ column: "in_review", config }), "In review");
 });

@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import type { KanbanColumn, SpecialistRole } from "@flow-factory/domain";
 
 import { authorizeRequest } from "./auth.js";
+import { writeTaskColumnToGithub } from "./github/project-write.js";
 import { cleanupRunWorktree } from "./worktree.js";
 import type { Store } from "./store.js";
 
@@ -241,6 +242,26 @@ export const createHttpServer = ({
         blocked: body.blocked !== undefined ? Boolean(body.blocked) : undefined,
         expectedRevision: body.revision !== undefined ? Number(body.revision) : undefined,
       });
+      if (result.ok && body.column !== undefined) {
+        const config = store.getGithubConfig();
+        if (config) {
+          const write = await writeTaskColumnToGithub({
+            config,
+            taskId,
+            column: result.task.column,
+          });
+          store.setTaskSyncError({
+            taskId,
+            syncError: write.ok ? null : write.error,
+          });
+          const task = store.getTask(taskId);
+          if (task) {
+            sendJson(response, 200, { ...result, task, github: write });
+            onMutation?.();
+            return;
+          }
+        }
+      }
       sendJson(response, result.ok ? 200 : 409, result);
       onMutation?.();
       return;

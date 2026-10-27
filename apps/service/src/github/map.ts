@@ -18,3 +18,16 @@ export const mapProjectStatusToColumn = ({
 
 export const isBlockedFromLabels = (labels: { name: string }[]) =>
   labels.some((label) => label.name === "blocked" || label.name === "factory-blocked");
+
+export const columnToProjectStatusName = ({
+  column,
+  config,
+}: {
+  column: KanbanColumn;
+  config: GithubConfig;
+}) => {
+  for (const [statusName, mapped] of Object.entries(config.statusFieldMap)) {
+    if (mapped === column) return statusName;
+  }
+  return null;
+};

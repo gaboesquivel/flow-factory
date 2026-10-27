@@ -101,6 +101,42 @@ server.registerTool(
 );
 
 server.registerTool(
+  "release_task",
+  {
+    description: "Release an exclusive task claim",
+    inputSchema: { taskId: z.string(), holder: z.string() },
+  },
+  async ({ taskId, holder }) => ({
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(store.releaseTask({ taskId, holder }), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
+  "submit_result",
+  {
+    description: "Submit verified or unverified run evidence",
+    inputSchema: {
+      runId: z.string(),
+      evidence: z.string(),
+      verified: z.boolean(),
+    },
+  },
+  async ({ runId, evidence, verified }) => ({
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(store.submitResult({ runId, evidence, verified }), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
   "start_run",
   {
     description: "Delegate task to cursor or ollama adapter",
