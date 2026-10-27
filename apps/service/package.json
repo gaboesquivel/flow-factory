@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --import tsx --watch src/main.ts",
-    "start": "node --import tsx src/main.ts",
+    "dev": "FLOW_FACTORY_DATA_DIR=../../.data node --import tsx --watch src/main.ts",
+    "start": "FLOW_FACTORY_DATA_DIR=../../.data node --import tsx src/main.ts",
     "test": "node --import tsx --test tests/**/*.test.ts",
     "check-types": "tsc --noEmit"
   },
