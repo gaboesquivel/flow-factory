@@ -53,29 +53,47 @@ export function stampTrusted(auth: SessionAuthContext): SessionAuthContext {
 export const INTAKE_ISSUE_ATTRIBUTE = "intakeIssue";
 
 /**
- * Rewrites a channel auth into the unattended factory principal, carrying the
- * intake issue number.
- *
- * @remarks
- * The GitHub channel calls this when the factory label is applied: the
- * webhook sender's identity is replaced (the turn must never run as the
- * labeler), and the issue number is stamped so `commentPolicy` can let the
- * run narrate on its own thread and nowhere else.
+ * Auth attribute carrying the pull request an unattended CI-fix run was
+ * dispatched from.
  */
-export function stampAutonomous(
+export const INTAKE_PULL_REQUEST_ATTRIBUTE = "intakePullRequest";
+
+const stampAutonomousPrincipal = (
+  auth: SessionAuthContext,
+  attributes: Record<string, string>
+): SessionAuthContext => ({
+  ...auth,
+  attributes: { ...auth.attributes, ...attributes },
+  principalId: AUTONOMOUS_PRINCIPAL,
+  principalType: "service",
+});
+
+/**
+ * Unattended issue intake (factory label). Stamps {@link INTAKE_ISSUE_ATTRIBUTE}
+ * for {@link commentPolicy} scoping.
+ */
+export const stampAutonomousForIssue = (
   auth: SessionAuthContext,
   intakeIssue: number
-): SessionAuthContext {
-  return {
-    ...auth,
-    attributes: {
-      ...auth.attributes,
-      [INTAKE_ISSUE_ATTRIBUTE]: String(intakeIssue),
-    },
-    principalId: AUTONOMOUS_PRINCIPAL,
-    principalType: "service",
-  };
-}
+) =>
+  stampAutonomousPrincipal(auth, {
+    [INTAKE_ISSUE_ATTRIBUTE]: String(intakeIssue),
+  });
+
+/**
+ * Unattended CI fix on a factory pull request. Stamps
+ * {@link INTAKE_PULL_REQUEST_ATTRIBUTE} for {@link pullRequestCommentPolicy}.
+ */
+export const stampAutonomousForPullRequest = (
+  auth: SessionAuthContext,
+  pullNumber: number
+) =>
+  stampAutonomousPrincipal(auth, {
+    [INTAKE_PULL_REQUEST_ATTRIBUTE]: String(pullNumber),
+  });
+
+/** @deprecated Use {@link stampAutonomousForIssue} or {@link stampAutonomousForPullRequest}. */
+export const stampAutonomous = stampAutonomousForIssue;
 
 /**
  * The issue number an unattended run was dispatched from, or null when the
@@ -94,6 +112,20 @@ export function intakeIssueNumber(
   const issue = Number(stamped);
   return Number.isSafeInteger(issue) && issue > 0 ? issue : null;
 }
+
+export const intakePullRequestNumber = (
+  auth: SessionAuthContext | null
+): number | null => {
+  if (!isAutonomous(auth)) {
+    return null;
+  }
+  const stamped = auth?.attributes[INTAKE_PULL_REQUEST_ATTRIBUTE];
+  if (typeof stamped !== "string" || stamped === "") {
+    return null;
+  }
+  const pull = Number(stamped);
+  return Number.isSafeInteger(pull) && pull > 0 ? pull : null;
+};
 
 /**
  * Whether the session runs unattended under {@link AUTONOMOUS_PRINCIPAL}.

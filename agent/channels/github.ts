@@ -7,7 +7,11 @@ import {
 import { FACTORY_BRANCH_PREFIX, FACTORY_LABEL } from "../lib/constants.js";
 import { mentionPattern, resolveBotName } from "../lib/github/bot-name.js";
 import { githubCredentials } from "../lib/github/credentials.js";
-import { stampAutonomous, stampTrusted } from "../lib/trust.js";
+import {
+  stampAutonomousForIssue,
+  stampAutonomousForPullRequest,
+  stampTrusted,
+} from "../lib/trust.js";
 
 /**
  * Commenter roles allowed to start a session by mentioning the agent.
@@ -215,7 +219,7 @@ export default githubChannel({
       return null;
     }
     return {
-      auth: stampAutonomous(defaultGitHubAuth(ctx), pullNumber),
+      auth: stampAutonomousForPullRequest(defaultGitHubAuth(ctx), pullNumber),
       context: [CI_FIX_TASK],
     };
   },
@@ -233,14 +237,18 @@ export default githubChannel({
       : null;
   },
   onIssue: async (ctx, issue) => {
-    const { labels } = issue.raw as {
+    const raw = issue.raw as {
+      label?: { name?: unknown };
       labels?: ReadonlyArray<{ name?: unknown }>;
     };
+    const addedLabel =
+      typeof raw.label?.name === "string" ? raw.label.name : null;
     const hasFactoryLabel =
-      Array.isArray(labels) &&
-      labels.some((entry) => entry?.name === FACTORY_LABEL);
+      Array.isArray(raw.labels) &&
+      raw.labels.some((entry) => entry?.name === FACTORY_LABEL);
     if (
       issue.action !== "labeled" ||
+      addedLabel !== FACTORY_LABEL ||
       !hasFactoryLabel ||
       ctx.sender.type === "Bot" ||
       !(await isTrustedLabeler(ctx))
@@ -248,7 +256,7 @@ export default githubChannel({
       return null;
     }
     return {
-      auth: stampAutonomous(defaultGitHubAuth(ctx), issue.issueNumber),
+      auth: stampAutonomousForIssue(defaultGitHubAuth(ctx), issue.issueNumber),
       context: [FACTORY_INTAKE_TASK],
     };
   },

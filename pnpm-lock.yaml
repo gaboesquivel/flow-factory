@@ -13,19 +13,19 @@ importers:
         version: 2.0.87(zod@4.6.5)
       '@github-tools/eve-extension':
         specifier: ^0.8.0
-        version: 0.8.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))
+        version: 0.8.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))
       '@vercel/blob':
         specifier: ^2.8.0
         version: 2.8.0
       '@vercel/connect':
         specifier: ^2.3.3
-        version: 2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))
+        version: 2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))
       ai:
         specifier: ^7.0.120
         version: 7.0.120(zod@4.6.5)
       eve:
         specifier: ^0.67.2
-        version: 0.67.2(ai@7.0.120(zod@4.6.5))
+        version: 0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)
       zod:
         specifier: 4.6.5
         version: 4.6.5
@@ -36,6 +36,9 @@ importers:
       '@types/node':
         specifier: ~24.19.0
         version: 24.19.0
+      microsandbox:
+        specifier: 0.5.5
+        version: 0.5.5
       tsx:
         specifier: ^4.21.0
         version: 4.23.15
@@ -593,6 +596,26 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
+  '@superradcompany/microsandbox-darwin-arm64@0.5.5':
+    resolution: {integrity: sha512-Yy7b2Ak+/WT+Ho3yRrcKclSl+hNVwcEAqtrWFLIQoGIjSCYEsL30r9S21zKFgd7z5o/FMdaGt/sNqWsV47Ar5g==}
+    engines: {node: '>= 22'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@superradcompany/microsandbox-linux-arm64-gnu@0.5.5':
+    resolution: {integrity: sha512-rOTT9yv81gEExbu8FDIyVQtN4wUk734jqWVNSXnMOk8CqLlIHZzLw0wRzkvWvuMUQ59B9GHG7jOzIinIkmnlsw==}
+    engines: {node: '>= 22'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@superradcompany/microsandbox-linux-x64-gnu@0.5.5':
+    resolution: {integrity: sha512-ZCrZskoX5wR6nQ42AqDXrJXE2t+2+/N3hb522Wudif+09Sr8OXFB3U2NA2YzN6yvzeL4PFga/DX/BT5jtsRjdg==}
+    engines: {node: '>= 22'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
   '@types/aws-lambda@8.10.162':
     resolution: {integrity: sha512-Fn658grtLOci1oxi1391vvDWJRKNGWRSqfxRkmN/Iy3c0tQH1USMKEXcPYHLvope+ZgTFocx9FRQJx1muBL6qw==}
 
@@ -1120,6 +1143,11 @@ packages:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
+  microsandbox@0.5.5:
+    resolution: {integrity: sha512-AJBFSIK4TYEO6pNfuXfceq3BcqOj2hxBEQjiXYNv6C4UtGDE2CNSzLwGzT2CCkuucRy+9EWvO8KS/zSZMgd/CA==}
+    engines: {node: '>= 22'}
+    hasBin: true
+
   mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
@@ -1587,13 +1615,13 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@github-tools/eve-extension@0.8.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))':
+  '@github-tools/eve-extension@0.8.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))':
     dependencies:
-      '@github-tools/sdk': 1.17.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))(zod@4.6.5)
-      eve: 0.67.2(ai@7.0.120(zod@4.6.5))
+      '@github-tools/sdk': 1.17.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))(zod@4.6.5)
+      eve: 0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)
       zod: 4.6.5
     optionalDependencies:
-      '@vercel/connect': 2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))
+      '@vercel/connect': 2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))
     transitivePeerDependencies:
       - '@ai-sdk/workflow'
       - '@nestjs/common'
@@ -1616,15 +1644,15 @@ snapshots:
       - vite
       - workflow
 
-  '@github-tools/sdk@1.17.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))(zod@4.6.5)':
+  '@github-tools/sdk@1.17.0(@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)))(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))(zod@4.6.5)':
     dependencies:
       ai: 7.0.120(zod@4.6.5)
-      evlog: 2.29.0(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))
+      evlog: 2.29.0(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))
       octokit: 5.0.5
       zod: 4.6.5
     optionalDependencies:
-      '@vercel/connect': 2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))
-      eve: 0.67.2(ai@7.0.120(zod@4.6.5))
+      '@vercel/connect': 2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))
+      eve: 0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)
     transitivePeerDependencies:
       - '@nestjs/common'
       - '@nuxt/kit'
@@ -1869,6 +1897,15 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
+  '@superradcompany/microsandbox-darwin-arm64@0.5.5':
+    optional: true
+
+  '@superradcompany/microsandbox-linux-arm64-gnu@0.5.5':
+    optional: true
+
+  '@superradcompany/microsandbox-linux-x64-gnu@0.5.5':
+    optional: true
+
   '@types/aws-lambda@8.10.162': {}
 
   '@types/node@24.19.0':
@@ -1958,12 +1995,12 @@ snapshots:
     dependencies:
       execa: 5.1.1
 
-  '@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5)))':
+  '@vercel/connect@2.3.3(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5))':
     dependencies:
       '@vercel/oidc': 3.8.9
     optionalDependencies:
       ai: 7.0.120(zod@4.6.5)
-      eve: 0.67.2(ai@7.0.120(zod@4.6.5))
+      eve: 0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)
 
   '@vercel/oidc@3.2.0': {}
 
@@ -2083,18 +2120,20 @@ snapshots:
       '@esbuild/win32-ia32': 0.28.2
       '@esbuild/win32-x64': 0.28.2
 
-  eve@0.67.2(ai@7.0.120(zod@4.6.5)):
+  eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5):
     dependencies:
       ai: 7.0.120(zod@4.6.5)
       nitro: 3.0.260903-beta
       undici: 8.9.0
+    optionalDependencies:
+      microsandbox: 0.5.5
 
   eventsource-parser@3.1.1: {}
 
-  evlog@2.29.0(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))):
+  evlog@2.29.0(ai@7.0.120(zod@4.6.5))(eve@0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)):
     optionalDependencies:
       ai: 7.0.120(zod@4.6.5)
-      eve: 0.67.2(ai@7.0.120(zod@4.6.5))
+      eve: 0.67.2(ai@7.0.120(zod@4.6.5))(microsandbox@0.5.5)
 
   execa@10.0.1:
     dependencies:
@@ -2250,6 +2289,12 @@ snapshots:
     dependencies:
       braces: 3.0.3
       picomatch: 2.3.2
+
+  microsandbox@0.5.5:
+    optionalDependencies:
+      '@superradcompany/microsandbox-darwin-arm64': 0.5.5
+      '@superradcompany/microsandbox-linux-arm64-gnu': 0.5.5
+      '@superradcompany/microsandbox-linux-x64-gnu': 0.5.5
 
   mimic-fn@2.1.0: {}
 

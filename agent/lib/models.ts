@@ -38,8 +38,18 @@ export const readLocalContextTokens = (agent: FactoryAgent) => {
   return parsed;
 };
 
+const inferLocalVendorFamily = (modelId: string) => {
+  const slash = modelId.indexOf("/");
+  const withoutProvider = slash !== -1 ? modelId.slice(slash + 1) : modelId;
+  const colon = withoutProvider.indexOf(":");
+  const tag = colon !== -1 ? withoutProvider.slice(0, colon) : withoutProvider;
+  const hyphen = tag.indexOf("-");
+  return hyphen !== -1 ? tag.slice(0, hyphen) : tag;
+};
+
 export const localVendorLabel = (agent: FactoryAgent, modelId: string) =>
-  process.env[`FACTORY_LOCAL_VENDOR_${agent.toUpperCase()}`]?.trim() ?? modelId;
+  process.env[`FACTORY_LOCAL_VENDOR_${agent.toUpperCase()}`]?.trim() ??
+  inferLocalVendorFamily(modelId);
 
 const stationUsesLocal = (agent: FactoryAgent, profile: ModelProfile) => {
   if (profile === "gateway") {

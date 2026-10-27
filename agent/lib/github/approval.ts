@@ -1,6 +1,7 @@
 import type { ApprovalContext, ApprovalStatus } from "eve/tools/approval";
 import {
   intakeIssueNumber,
+  intakePullRequestNumber,
   isAutonomous,
   isScheduleAppAuth,
   isTrusted,
@@ -61,6 +62,28 @@ export function commentPolicy(ctx: ApprovalContext): ApprovalStatus {
   return {
     reason: `Unattended factory runs may comment only on the issue they were dispatched from${
       intakeIssue === null ? "" : ` (#${intakeIssue})`
+    }.`,
+    type: "denied",
+  };
+}
+
+/**
+ * `addPullRequestComment`: unattended CI-fix runs may narrate on their anchored
+ * pull request thread only.
+ */
+export function pullRequestCommentPolicy(ctx: ApprovalContext): ApprovalStatus {
+  const auth = ctx.session.auth.current;
+  if (!isAutonomous(auth)) {
+    return writePolicy(ctx);
+  }
+  const intakePull = intakePullRequestNumber(auth);
+  const input = ctx.toolInput as { pullNumber?: unknown } | undefined;
+  if (intakePull !== null && input?.pullNumber === intakePull) {
+    return "not-applicable";
+  }
+  return {
+    reason: `Unattended factory runs may comment only on the pull request they were dispatched from${
+      intakePull === null ? "" : ` (#${intakePull})`
     }.`,
     type: "denied",
   };
@@ -149,7 +172,7 @@ export function closeIssuePolicy(): ApprovalStatus {
  */
 export function createPullRequestPolicy(ctx: ApprovalContext): ApprovalStatus {
   const input = ctx.toolInput as { draft?: unknown } | undefined;
-  if (input?.draft === true) {
+  if (input?.draft === true || input?.draft === "true") {
     return "not-applicable";
   }
   return shipPolicy(ctx);

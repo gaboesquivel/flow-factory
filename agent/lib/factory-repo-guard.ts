@@ -1,8 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const agentRoot = join(fileURLToPath(new URL(".", import.meta.url)), "..");
+const agentRoot = join(process.cwd(), "agent");
 
 const TARGETING_PATHS = [
   "lib/github/repo-sandbox.ts",
