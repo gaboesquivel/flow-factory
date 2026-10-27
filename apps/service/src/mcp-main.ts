@@ -63,5 +63,57 @@ server.registerTool(
   }),
 );
 
+server.registerTool(
+  "claim_task",
+  {
+    description: "Exclusive claim for Work Here",
+    inputSchema: { taskId: z.string(), holder: z.string() },
+  },
+  async ({ taskId, holder }) => ({
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(store.claimTask({ taskId, holder }), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
+  "start_run",
+  {
+    description: "Delegate task to cursor or ollama adapter",
+    inputSchema: {
+      taskId: z.string(),
+      specialist: z.enum(["product", "design", "dev", "qa", "research"]),
+      adapter: z.enum(["cursor", "ollama"]),
+      idempotencyKey: z.string(),
+    },
+  },
+  async ({ taskId, specialist, adapter, idempotencyKey }) => {
+    try {
+      const result = store.startRun({
+        taskId,
+        specialist,
+        adapter,
+        model: null,
+        idempotencyKey,
+      });
+      return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({
+              error: error instanceof Error ? error.message : "start_failed",
+            }),
+          },
+        ],
+      };
+    }
+  },
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);

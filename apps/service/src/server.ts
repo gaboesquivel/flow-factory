@@ -156,6 +156,7 @@ export const createHttpServer = ({
           idempotencyKey,
         });
         sendJson(response, 201, result);
+        onMutation?.();
       } catch (error) {
         sendJson(response, 409, {
           error: error instanceof Error ? error.message : "start_failed",
@@ -241,6 +242,17 @@ export const createHttpServer = ({
       });
       sendJson(response, result.ok ? 200 : 409, result);
       onMutation?.();
+      return;
+    }
+
+    if (path === "/v1/reviews/draft-pr" && method === "POST") {
+      const body = await readJson(request);
+      const result = await store.approveReviewWithDraftPr({
+        runId: String(body.runId ?? ""),
+        evidence: String(body.evidence ?? ""),
+        humanAuthorized: Boolean(body.humanAuthorized),
+      });
+      sendJson(response, result.ok ? 201 : 409, result);
       return;
     }
 

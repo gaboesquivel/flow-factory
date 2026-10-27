@@ -4,7 +4,10 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 
+import { parseTaskId } from "@flow-factory/domain";
+
 import type { Store } from "./store.js";
+import { ensureRunWorktree } from "./worktree.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -65,11 +68,21 @@ export const createCoordinator = ({ store, repoRoot }: { store: Store; repoRoot:
         ? `Task ${task.id}: ${task.title}\n\n${task.body}\n\nAcceptance:\n${task.acceptanceCriteria.join("\n")}`
         : `Task ${queued.taskId}`;
 
+      let workspace = repoRoot;
+      if (queued.adapter === "cursor") {
+        const ref = parseTaskId(queued.taskId);
+        const branch = ref
+          ? `factory/issue-${ref.number}-${runId.slice(0, 8)}`
+          : `factory/run-${runId.slice(0, 8)}`;
+        workspace = await ensureRunWorktree({ repoRoot, runId, baseRef: "main" });
+        store.setRunWorktree({ runId, worktreePath: workspace, branchName: branch });
+      }
+
       const evidence =
         queued.adapter === "ollama"
           ? await runOllama({ model: queued.model ?? "qwen3:4b", prompt })
           : await runCursor({
-              workspace: repoRoot,
+              workspace,
               model: queued.model,
               prompt,
             });
@@ -78,7 +91,7 @@ export const createCoordinator = ({ store, repoRoot }: { store: Store; repoRoot:
       if (!current || current.status === "cancelled") return;
 
       store.updateRunStatus({ runId, status: "completed", evidence });
-      store.logTaskActivity(queued.taskId, "run_completed", { runId });
+      store.logTaskActivity(queued.taskId, "run_completed", { runId, workspace });
     } catch (error) {
       const current = store.getRun(runId);
       if (current && current.status !== "cancelled") {

@@ -37,4 +37,4 @@ Bearer token: `.data/local.token` (created on first service start).
 
 ## Alpha status
 
-Foundation: service, SQLite, HTTP API, dashboard shell, CLI read paths. GitHub sync, MCP, delegation, and review ship in follow-up PRs.
+See [docs/manual-alpha-checklist.md](docs/manual-alpha-checklist.md). GitHub sync, MCP, claims, handoffs, run queue, worktrees, and authorized draft PR API are on `main`. Cursor/Ollama and Projects V2 require local tooling setup; failures stay visible.
