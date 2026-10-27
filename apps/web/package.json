@@ -15,7 +15,7 @@
     "test:browser:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.58",
+    "@ai-sdk/anthropic": "^4.0.87",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/server": "^2.4.0",
     "@openuidev/lang-core": "1.0.1",
