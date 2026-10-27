@@ -93,7 +93,7 @@ export const createHttpServer = ({
         blocked: Boolean(body.blocked),
         priority: body.priority ? String(body.priority) : null,
         assignee: body.assignee ? String(body.assignee) : null,
-        activeSpecialist: body.activeSpecialist as SpecialistRole | null,
+        activeSpecialist: body.activeSpecialist ? (body.activeSpecialist as SpecialistRole) : null,
         acceptanceCriteria: Array.isArray(body.acceptanceCriteria)
           ? body.acceptanceCriteria.map(String)
           : [],

@@ -75,6 +75,7 @@ export const KanbanBoard = ({ tasks }: { tasks: TaskCard[] }) => {
         {byColumn.map(({ column, tasks: columnTasks }) => (
           <div
             key={column}
+            data-testid={`kanban-column-${column}`}
             onDragOver={(event) => {
               event.preventDefault();
               event.dataTransfer.dropEffect = "move";

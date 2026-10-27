@@ -14,6 +14,7 @@ export const FactoryToolbar = () => {
     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
       <button
         type="button"
+        data-testid="sync-github"
         disabled={busy}
         onClick={async () => {
           setBusy(true);
