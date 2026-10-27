@@ -40,11 +40,11 @@ export const readLocalContextTokens = (agent: FactoryAgent) => {
 
 const inferLocalVendorFamily = (modelId: string) => {
   const slash = modelId.indexOf("/");
-  const withoutProvider = slash !== -1 ? modelId.slice(slash + 1) : modelId;
+  const withoutProvider = slash === -1 ? modelId : modelId.slice(slash + 1);
   const colon = withoutProvider.indexOf(":");
-  const tag = colon !== -1 ? withoutProvider.slice(0, colon) : withoutProvider;
+  const tag = colon === -1 ? withoutProvider : withoutProvider.slice(0, colon);
   const hyphen = tag.indexOf("-");
-  return hyphen !== -1 ? tag.slice(0, hyphen) : tag;
+  return hyphen === -1 ? tag : tag.slice(0, hyphen);
 };
 
 export const localVendorLabel = (agent: FactoryAgent, modelId: string) =>
