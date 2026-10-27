@@ -35,7 +35,8 @@ Adopt Foreman on Eve as the runtime. Integrate Flow Skills as proportional judgm
 ### Verification
 
 - [x] `pnpm test` passes focused policy/model/instruction tests.
-- [ ] `pnpm eval --tag fast` passes when eval environment is configured (requires AI Gateway `/login` or deployment credentials).
+- [x] `pnpm eval:fast:local` passes with `eve link` gateway credentials (2/2 evals, exit 0).
+- [ ] `pnpm eval:fast` fully green (2 evals still need live `FACTORY_REPO` + GitHub Connect; `needs-connect` tag).
 - [ ] Live labeled issue → draft PR exercised when scratch repo and connectors are available.
 
 ## Out of scope

@@ -63,8 +63,21 @@ Gateway defaults (see [agent/lib/model-policy.ts](agent/lib/model-policy.ts)):
 ```bash
 FACTORY_REPO=owner/repo GITHUB_CONNECTOR=github/your-connector pnpm validate
 pnpm test
-pnpm eval --tag fast    # requires eval credentials per Foreman docs
 ```
+
+**Evals** call live models. After linking the Vercel project, pull gateway credentials:
+
+```bash
+vercel link
+pnpm exec eve link --non-interactive --team <team> --project flow-factory
+```
+
+| Command | When |
+| --- | --- |
+| `pnpm eval:fast:local` | No GitHub Connect: runs `fast` evals except `needs-connect` (smoke + no-direct-push-to-main) |
+| `pnpm eval:fast` | Full fast suite; set `FACTORY_REPO`, `GITHUB_CONNECTOR`, and a repo with issue `#1` for label routing evals |
+
+Against a deployment: `pnpm exec eve eval --tag fast --url https://<your-deployment>`.
 
 ## Docs
 

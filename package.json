@@ -14,6 +14,8 @@
     "check": "ultracite check",
     "dev": "eve dev",
     "eval": "eve eval",
+    "eval:fast": "eve eval --tag fast",
+    "eval:fast:local": "eve eval --tag fast --exclude-tag needs-connect",
     "fix": "ultracite fix",
     "models:check": "node --import tsx scripts/models-check.ts",
     "start": "eve start",
@@ -33,6 +35,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@types/node": "~24.19.0",
+    "microsandbox": "0.5.5",
     "tsx": "^4.21.0",
     "typescript": "7.0.2",
     "ultracite": "^7.12.1"
