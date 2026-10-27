@@ -12,12 +12,19 @@ import { openDatabase } from "./db.js";
 import { createStore } from "./store.js";
 import { createHttpServer } from "./server.js";
 import { createCoordinator } from "./coordinator.js";
+import { sweepOrphanWorktrees } from "./worktree.js";
 
 const dataDir = resolveDataDir();
 const repoRoot = join(dataDir, "..");
 const db = openDatabase(resolveDbPath(dataDir));
 const store = createStore(db);
 store.markRunsUnknownOnRestart();
+void sweepOrphanWorktrees({
+  repoRoot,
+  activeRunIds: store.listActiveWorktreeRunIds(),
+}).then(({ removed }) => {
+  if (removed.length) console.log(`Removed orphan worktrees: ${removed.join(", ")}`);
+});
 
 const token = ensureLocalToken(resolveTokenPath(dataDir));
 const host = resolveHost();

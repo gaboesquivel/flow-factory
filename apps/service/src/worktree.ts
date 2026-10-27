@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
@@ -50,4 +50,23 @@ export const cleanupRunWorktree = async ({
 }) => {
   if (!worktreePath) return;
   await removeRunWorktree({ repoRoot, runId });
+};
+
+export const sweepOrphanWorktrees = async ({
+  repoRoot,
+  activeRunIds,
+}: {
+  repoRoot: string;
+  activeRunIds: string[];
+}) => {
+  const dir = join(repoRoot, ".data", "worktrees");
+  if (!existsSync(dir)) return { removed: [] as string[] };
+  const active = new Set(activeRunIds);
+  const removed: string[] = [];
+  for (const runId of readdirSync(dir)) {
+    if (active.has(runId)) continue;
+    await removeRunWorktree({ repoRoot, runId });
+    removed.push(runId);
+  }
+  return { removed };
 };

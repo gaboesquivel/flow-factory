@@ -2,7 +2,25 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { KanbanColumn } from "@flow-factory/domain";
+
 import { factoryFetch } from "../lib/factory-api";
+
+export const moveTaskColumn = async ({
+  taskId,
+  column,
+}: {
+  taskId: string;
+  column: KanbanColumn;
+}) => {
+  const result = await factoryFetch(`/v1/tasks/${encodeURIComponent(taskId)}/update`, {
+    method: "POST",
+    body: { column },
+  });
+  revalidatePath("/");
+  revalidatePath(`/tasks/${encodeURIComponent(taskId)}`);
+  return result;
+};
 
 export const syncGithub = async () => {
   const result = await factoryFetch("/v1/github/sync", { method: "POST" });
