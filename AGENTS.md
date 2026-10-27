@@ -1,20 +1,16 @@
 # Agents
 
-Flow Factory Alpha on branch `factory/*` → PRs to `main`.
+Flow Factory on branch `factory/eve-rewrite` → PRs to `main`.
 
-| Document                                                                       | Use                    |
-| ------------------------------------------------------------------------------ | ---------------------- |
-| [PRODUCT.md](PRODUCT.md)                                                       | Product identity       |
-| [ARCHITECTURE.md](ARCHITECTURE.md)                                             | Technical boundaries   |
-| [docs/specs/001-local-foreman-alpha.md](docs/specs/001-local-foreman-alpha.md) | Alpha specification    |
-| [docs/planning/002-post-alpha.md](docs/planning/002-post-alpha.md)             | Post-Alpha plan (done) |
-| [docs/specs/002-beta-dashboard-ops.md](docs/specs/002-beta-dashboard-ops.md)   | Beta dashboard ops     |
-| [docs/manual-alpha-checklist.md](docs/manual-alpha-checklist.md)               | Manual acceptance      |
+| Document | Use |
+| --- | --- |
+| [PRODUCT.md](PRODUCT.md) | Product identity |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Eve / Foreman layout, models, Flow integration |
+| [docs/specs/003-eve-foreman-rewrite.md](docs/specs/003-eve-foreman-rewrite.md) | Current rewrite acceptance criteria |
+| [UPSTREAM.md](UPSTREAM.md) | Foreman upstream commit and attribution |
 
-Install Flow Skills: `npx skills add gaboesquivel/flow-skills --skill '*' -a cursor -y`
+Read `node_modules/eve/docs/` before changing Eve integrations. Station pipeline and approval boundaries come from upstream Foreman unless spec 003 says otherwise.
 
-**Flow execution:** Spec 001 is complete; use [002-post-alpha](docs/planning/002-post-alpha.md) for next packages. Align `PRODUCT.md`, `DESIGN.md`, `ARCHITECTURE.md`, and specs when behavior changes (`implement` / `flow` skills).
-
-**Verification:** `pnpm check-types`, `pnpm test`, `pnpm lint`; UI or route changes → `pnpm test:browser`.
+**Verification:** `FACTORY_REPO` and `GITHUB_CONNECTOR` set → `pnpm validate`, `pnpm test`. After `pnpm exec eve link`, run `pnpm eval:fast:local` (no Connect) or `pnpm eval:fast` (full fast suite with Connect + target repo).
 
 Do not touch `meta-cto` or derive implementation from it.

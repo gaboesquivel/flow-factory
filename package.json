@@ -1,21 +1,46 @@
 {
   "name": "flow-factory",
+  "version": "0.1.0",
   "private": true,
+  "description": "Flow Factory — Eve software factory with Flow Skills methodology.",
+  "license": "MIT",
   "type": "module",
+  "imports": {
+    "#*": "./agent/*",
+    "#evals/*": "./evals/*"
+  },
   "scripts": {
-    "dev": "pnpm --parallel --filter @flow-factory/service --filter @flow-factory/web dev",
-    "factory": "pnpm --filter @flow-factory/service start",
-    "factory:mcp": "FLOW_FACTORY_DATA_DIR=.data pnpm --filter @flow-factory/service exec node --import tsx src/mcp-main.ts",
-    "test": "pnpm -r test",
-    "test:browser": "pnpm --filter @flow-factory/web test:browser",
-    "check-types": "pnpm -r check-types",
-    "lint": "oxfmt --check . && oxlint .",
-    "lint:fix": "oxfmt --write . && oxlint --fix ."
+    "build": "eve build",
+    "check": "ultracite check",
+    "dev": "eve dev",
+    "eval": "eve eval",
+    "eval:fast": "eve eval --tag fast",
+    "eval:fast:local": "eve eval --tag fast --exclude-tag needs-connect",
+    "fix": "ultracite fix",
+    "models:check": "node --import tsx scripts/models-check.ts",
+    "start": "eve start",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "typecheck": "tsc",
+    "validate": "pnpm run check && pnpm run typecheck && eve info"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^2.0.30",
+    "@github-tools/eve-extension": "^0.8.0",
+    "@vercel/blob": "^2.8.0",
+    "@vercel/connect": "^2.3.3",
+    "ai": "^7.0.120",
+    "eve": "^0.67.2",
+    "zod": "4.6.5"
   },
   "devDependencies": {
-    "oxfmt": "^0.74.0",
-    "oxlint": "^1.89.0",
-    "typescript": "^7.0.2"
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "~24.19.0",
+    "microsandbox": "0.5.5",
+    "tsx": "^4.21.0",
+    "typescript": "7.0.2",
+    "ultracite": "^7.12.1"
   },
-  "packageManager": "pnpm@10.14.0"
+  "engines": {
+    "node": "24.x"
+  }
 }

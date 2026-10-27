@@ -1,15 +1,10 @@
 # Design
 
-## Experience
+Flow Factory has no custom dashboard. Operators use:
 
-The home screen is a **task board**: five Kanban columns backed by GitHub Issues and Projects, with drag-and-drop moves, a compact factory status strip, and **Sync GitHub** in the header. Cards show blocked state, run status, and sync errors. Task detail surfaces acceptance criteria, handoffs, runs, column moves, and authorized draft PR actions.
+- **GitHub** — issues, labels, draft pull requests, and CI on the target repository.
+- **Eve dev TUI** — `pnpm dev` for local sessions; GitHub writes wait for approval in the TUI when untrusted.
 
-Secondary areas cover runs, specialists, and settings (connections, adapters, pause).
+Progress appears as issue comments during unattended runs and as a final summary with the draft PR link.
 
-## Visual system
-
-Porcelain-inspired palette: warm canvas `#f7f7f2`, ink text `#202522`, muted labels `#626a65`, indigo accent `#4f46a5`. Status is never conveyed by color alone — labels and text accompany state.
-
-## Accessibility
-
-Semantic headings, `role="alert"` for errors, keyboard-focusable controls on the dashboard shell.
+Visual and interaction design for a future Flow dashboard are out of scope for this milestone; GitHub and Eve are the operator surfaces.

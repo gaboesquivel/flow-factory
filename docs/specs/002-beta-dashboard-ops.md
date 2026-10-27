@@ -1,5 +1,7 @@
 # 002 — Beta dashboard operations
 
+> **Historical:** Describes the removed Kanban dashboard; current operator UI is GitHub + Eve dev TUI ([003](003-eve-foreman-rewrite.md)).
+
 **Status:** Complete  
 **Owner:** Flow Factory  
 **Builds on:** [001 — Local Foreman Alpha](001-local-foreman-alpha.md)

@@ -1,42 +1,86 @@
 # Flow Factory
 
-Local-first software factory: GitHub tasks → specialized agents → verified outcomes.
+Open-source software factory on [Eve](https://eve.dev) and [Foreman](https://github.com/vercel-labs/eve-software-factory-template): GitHub issue → classifier → analyst → implementer → independent reviewer → **draft** pull request on your repository.
+
+Flow Skills provide product-engineering discipline inside each station without a second workflow engine.
+
+Upstream baseline: [UPSTREAM.md](UPSTREAM.md).
 
 ## Prerequisites
 
 - Node.js 24+
 - pnpm 10+
-- `gh` authenticated for GitHub (project scope: `gh auth refresh -s project`)
-- Optional: [Ollama](https://ollama.com) and `agent login` for execution adapters
+- Vercel project linked for deployment (or local `eve dev`)
+- `FACTORY_REPO` — existing GitHub repository the factory works on
+- `GITHUB_CONNECTOR` — Vercel Connect GitHub connector UID
 
 ## Setup
 
 ```bash
 pnpm install
-npx skills add gaboesquivel/flow-skills --skill '*' -a cursor -y
-pnpm factory    # http://127.0.0.1:3747
-pnpm dev        # service + dashboard http://localhost:3750
-pnpm test:browser   # Playwright smoke (starts service + web)
+cp .env.example .env   # edit FACTORY_REPO and connectors
+vercel link            # when deploying or pulling env
+vercel env pull        # optional: sync connector UIDs
+pnpm validate
+pnpm dev               # Eve TUI
 ```
 
-CLI (from repo root after service is running):
+### GitHub-only
+
+`GITHUB_CONNECTOR` and `FACTORY_REPO` are required. `LINEAR_CONNECTOR` is optional.
+
+### Linear (optional)
+
+1. Set `LINEAR_CONNECTOR` in the environment.
+2. Copy [docs/linear-channel.example.ts](docs/linear-channel.example.ts) to `agent/channels/linear.ts`.
+3. Re-run `pnpm validate`.
+
+## Model configuration
+
+| Profile | Env | Use |
+| --- | --- | --- |
+| `gateway` | `FACTORY_MODEL_PROFILE=gateway` (default) | Vercel AI Gateway models (required on Vercel) |
+| `local` | `FACTORY_MODEL_PROFILE=local` + `FACTORY_LOCAL_BASE_URL` + `FACTORY_LOCAL_MODEL_*` | Ollama, LM Studio, or other OpenAI-compatible servers |
+| `hybrid` | `FACTORY_MODEL_PROFILE=hybrid` | Local orchestrator/classifier; gateway for other stations |
+
+Probe local models: `pnpm models:check` (no-op for gateway profile).
+
+Gateway defaults (see [agent/lib/model-policy.ts](agent/lib/model-policy.ts)):
+
+- Orchestrator, classifier, analyst, researcher: `deepseek/deepseek-v4.1-flash-1017`
+- Implementer: `deepseek/deepseek-v4-pro`
+- Reviewer: `zai/glm-5.3-flash` (different vendor family from implementer)
+
+## Operating the factory
+
+1. Install the GitHub App behind `GITHUB_CONNECTOR` on `FACTORY_REPO`.
+2. Label an issue with `factory` (or the value of `FACTORY_LABEL`) or @mention the bot from a trusted collaborator.
+3. Watch station progress on the issue; receive a draft PR when review approves.
+4. Mark the PR ready and merge as a human.
+
+## Verification
 
 ```bash
-node apps/cli/bin/flow-factory.mjs status
-node apps/cli/bin/flow-factory.mjs configure gaboesquivel flow-factory
-node apps/cli/bin/flow-factory.mjs sync
-node apps/cli/bin/flow-factory.mjs move 'gaboesquivel/flow-factory#4' in_progress
-node apps/cli/bin/flow-factory.mjs task 'gaboesquivel/flow-factory#4'
-node apps/cli/bin/flow-factory.mjs claim 'gaboesquivel/flow-factory#4' cursor
-pnpm factory:mcp   # MCP: list/get tasks, sync, claim/release, save_handoff, update_task_column, start_run, submit_result
+FACTORY_REPO=owner/repo GITHUB_CONNECTOR=github/your-connector pnpm validate
+pnpm test
 ```
 
-Bearer token: `.data/local.token` (created on first service start).
+**Evals** call live models. After linking the Vercel project, pull gateway credentials:
+
+```bash
+vercel link
+pnpm exec eve link --non-interactive --team <team> --project flow-factory
+```
+
+| Command | When |
+| --- | --- |
+| `pnpm eval:fast:local` | No GitHub Connect: runs `fast` evals except `needs-connect` (smoke + no-direct-push-to-main) |
+| `pnpm eval:fast` | Full fast suite; set `FACTORY_REPO`, `GITHUB_CONNECTOR`, and a repo with issue `#1` for label routing evals |
+
+Against a deployment: `pnpm exec eve eval --tag fast --url https://<your-deployment>`.
 
 ## Docs
 
-[PRODUCT.md](PRODUCT.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [Spec 001](docs/specs/001-local-foreman-alpha.md) · [Spec 002](docs/specs/002-beta-dashboard-ops.md)
+[PRODUCT.md](PRODUCT.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [Spec 003](docs/specs/003-eve-foreman-rewrite.md)
 
-## Alpha status
-
-See [docs/manual-alpha-checklist.md](docs/manual-alpha-checklist.md). GitHub sync, MCP, claims, handoffs, run queue, worktrees, and authorized draft PR API are on `main`. Cursor/Ollama and Projects V2 require local tooling setup; failures stay visible.
+Historical: [Spec 001](docs/specs/001-local-foreman-alpha.md) (pre-Eve alpha), [Spec 002](docs/specs/002-beta-dashboard-ops.md).

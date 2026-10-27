@@ -1,7 +1,9 @@
 # Flow Factory
 
-Flow Factory is a local-first, open-source, human-directed software factory that turns GitHub tasks into verified outcomes through specialized AI agents.
+Flow Factory turns GitHub issues into verified software using Vercel's Eve runtime and Foreman's station pipeline.
 
-It uses [Flow Skills](https://github.com/gaboesquivel/flow-skills) for methodology discipline. The human owns consequential decisions; agents prepare, execute, and review with evidence.
+**Mission:** From intent to verified software.
 
-See [docs/specs/001-local-foreman-alpha.md](docs/specs/001-local-foreman-alpha.md) for the Alpha contract.
+[Flow Skills](https://github.com/gaboesquivel/flow-skills) supplies product-engineering judgment inside each station. Flow is methodology, not the orchestrator. Humans own consequential decisions; the factory prepares, implements, and independently reviews with evidence, then delivers a **draft** pull request on the configured target repository.
+
+The factory never merges on its own.

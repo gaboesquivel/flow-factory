@@ -2,13 +2,17 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, factory/eve-rewrite]
   pull_request:
     branches: [main]
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      FACTORY_REPO: acme/widgets
+      GITHUB_CONNECTOR: github/foreman-agent
+      FACTORY_MODEL_PROFILE: gateway
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -19,10 +23,5 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check-types
+      - run: pnpm validate
       - run: pnpm test
-      - run: pnpm exec playwright install chromium --with-deps
-        working-directory: apps/web
-      - run: pnpm test:browser
-        env:
-          CI: true
