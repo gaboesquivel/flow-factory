@@ -3,6 +3,7 @@
 **Status:** accepted (2026-10-28) · **Issue:** [#17](https://github.com/gaboesquivel/flow-factory/issues/17)  
 **Builds on:** [003 — Eve / Foreman rewrite](003-eve-foreman-rewrite.md) (completes its open live draft-PR criterion)  
 **Product context:** [PRODUCT.md — Speed on a small budget, Metrics](../../PRODUCT.md#metrics)
+**Progress:** `pnpm runs:record` and `pnpm runs:summary` landed with fixture tests. The five live runs, review notes, and the spec 003 criterion remain; they need the owner.
 
 ## Problem Statement
 
