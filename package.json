@@ -18,6 +18,8 @@
     "eval:fast:local": "eve eval --tag fast --exclude-tag needs-connect",
     "fix": "ultracite fix",
     "models:check": "node --import tsx scripts/models-check.ts",
+    "runs:record": "node --import tsx scripts/runs-record.ts",
+    "runs:summary": "node --import tsx scripts/runs-summary.ts",
     "start": "eve start",
     "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "tsc",
