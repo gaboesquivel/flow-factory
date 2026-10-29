@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   buildRecord,
   type GitHubInputs,
+  linkedPullRequest,
   mergeRecord,
   stationsFromTraces,
   type Trace,
@@ -63,7 +64,6 @@ const github: GitHubInputs = {
   issue: { html_url: "https://github.com/acme/widgets/issues/7", number: 7 },
   label: "factory",
   repo: "acme/widgets",
-  reviewTimes: ["2026-11-01T10:30:00Z"],
   timeline: [
     {
       created_at: "2026-11-01T10:00:00Z",
@@ -116,13 +116,15 @@ test("a reviewed draft PR records timestamps and revision rounds", () => {
     url: "https://github.com/acme/widgets/pull/8",
   });
   assert.equal(record.timestamps.draftPrOpenedAt, "2026-11-01T10:20:00Z");
+  // The reviewer approves before the PR opens; its verdict is in the PR body.
+  assert.equal(record.timestamps.reviewPostedAt, "2026-11-01T10:20:00Z");
   assert.equal(record.revisionRounds, 1);
   assert.equal(record.sandboxCostUsd, null);
 });
 
 test("a failed run is counted as a failure with its station", () => {
   const record = buildRecord(
-    { ...github, reviewTimes: [], timeline: github.timeline.slice(0, 1) },
+    { ...github, timeline: github.timeline.slice(0, 1) },
     traces,
     "conv-2",
     { failedStation: "implementer" }
@@ -140,13 +142,28 @@ test("a failed run is counted as a failure with its station", () => {
   ]);
 });
 
+test("a PR referenced before the label is not the run's PR", () => {
+  const earlier = {
+    event: "cross-referenced",
+    source: {
+      issue: {
+        created_at: "2026-11-01T09:00:00Z",
+        html_url: "https://github.com/acme/widgets/pull/3",
+        number: 3,
+        pull_request: { merged_at: null },
+      },
+    },
+  };
+  const timeline = [earlier, ...github.timeline];
+  assert.equal(linkedPullRequest(timeline, "2026-11-01T10:00:00Z")?.number, 8);
+});
+
 test("re-recording fills merge and deploy without overwriting earlier fields", () => {
   const first = buildRecord(github, traces, "conv-1", { intervention: false });
   const later = buildRecord(
     {
       ...github,
       deployedAt: "2026-11-02T09:05:00Z",
-      reviewTimes: ["2026-11-01T11:45:00Z"],
       timeline: [
         {
           created_at: "2026-11-01T10:00:00Z",
@@ -170,7 +187,7 @@ test("re-recording fills merge and deploy without overwriting earlier fields", (
     "conv-1"
   );
   const merged = mergeRecord(first, later);
-  assert.equal(merged.timestamps.reviewPostedAt, "2026-11-01T10:30:00Z");
+  assert.equal(merged.timestamps.reviewPostedAt, "2026-11-01T10:20:00Z");
   assert.equal(merged.timestamps.mergedAt, "2026-11-02T09:00:00Z");
   assert.equal(merged.timestamps.deployedAt, "2026-11-02T09:05:00Z");
   assert.deepEqual(merged.stations, first.stations);
@@ -191,7 +208,7 @@ test("summary names unknown cost instead of counting it as zero", () => {
     "gateway:reviewer",
     "sandbox",
   ]);
-  assert.equal(summary.labelToReviewedPrMs.median, 30 * 60_000);
+  assert.equal(summary.labelToReviewedPrMs.median, 20 * 60_000);
   assert.equal(summary.labelToProductionMs.median, null);
 });
 

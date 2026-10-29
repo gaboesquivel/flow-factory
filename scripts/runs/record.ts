@@ -131,8 +131,6 @@ export interface GitHubInputs {
   issue: { number: number; html_url: string };
   label: string;
   repo: string;
-  /** Reviews and comments on the linked pull request, when there is one. */
-  reviewTimes?: string[];
   /** Issue timeline events, oldest first. */
   timeline: Array<{
     event: string;
@@ -149,15 +147,30 @@ export interface GitHubInputs {
   }>;
 }
 
-const earliest = (times: Array<string | undefined>) =>
-  times.filter((t): t is string => Boolean(t)).sort()[0];
-
 export interface RecordOverrides {
   failedStation?: Station;
   intervention?: boolean;
   outcome?: RunRecord["outcome"];
   sandboxCostUsd?: number | null;
 }
+
+const labeledAtOf = (github: GitHubInputs) =>
+  github.timeline.find(
+    (event) => event.event === "labeled" && event.label?.name === github.label
+  )?.created_at;
+
+/** The first pull request cross-referenced on the issue after it was labeled. */
+export const linkedPullRequest = (
+  timeline: GitHubInputs["timeline"],
+  labeledAt: string | undefined
+) =>
+  labeledAt
+    ? timeline
+        .map((event) => event.source?.issue)
+        .find(
+          (source) => source?.pull_request && source.created_at >= labeledAt
+        )
+    : undefined;
 
 /** Builds a run record from GitHub payloads and the run's traces. */
 export const buildRecord = (
@@ -166,21 +179,16 @@ export const buildRecord = (
   traceId: string,
   overrides: RecordOverrides = {}
 ): RunRecord => {
-  const labeledAt = github.timeline.find(
-    (event) => event.event === "labeled" && event.label?.name === github.label
-  )?.created_at;
+  const labeledAt = labeledAtOf(github);
   if (!labeledAt) {
     throw new Error(
       `Issue #${github.issue.number} has no "${github.label}" labeled event.`
     );
   }
-  const pr = github.timeline
-    .map((event) => event.source?.issue)
-    .find((source) => source?.pull_request && source.created_at >= labeledAt);
-  const reviewPostedAt = earliest(github.reviewTimes ?? []);
-  const outcome =
-    overrides.outcome ??
-    (pr && reviewPostedAt ? "reviewed_draft_pr" : "failed");
+  const pr = linkedPullRequest(github.timeline, labeledAt);
+  // Factory opens the draft PR only after the reviewer approves, with the verdict in its body.
+  const reviewPostedAt = pr?.created_at;
+  const outcome = overrides.outcome ?? (pr ? "reviewed_draft_pr" : "failed");
   const record: RunRecord = {
     intervention: overrides.intervention ?? false,
     issue: {
