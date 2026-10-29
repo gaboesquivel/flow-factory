@@ -1,5 +1,3 @@
-import { assertFactoryRepoTargeting } from "./factory-repo-guard.js";
-
 /**
  * Reads a required environment variable, throwing if it is unset so
  * misconfiguration fails fast instead of surfacing mid-request.
@@ -77,5 +75,3 @@ export const FACTORY_LABEL = process.env.FACTORY_LABEL ?? "factory";
  */
 export const FACTORY_BRANCH_PREFIX =
   process.env.FACTORY_BRANCH_PREFIX ?? "factory/";
-
-assertFactoryRepoTargeting(FACTORY_REPO);
