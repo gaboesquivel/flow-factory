@@ -1,6 +1,6 @@
 # Spec 004 — Baseline run metrics
 
-**Status:** draft (2026-10-28)  
+**Status:** accepted (2026-10-28)  
 **Builds on:** [003 — Eve / Foreman rewrite](003-eve-foreman-rewrite.md) (completes its open live draft-PR criterion)  
 **Product context:** [PRODUCT.md — Speed on a small budget, Metrics](../../PRODUCT.md#metrics)
 
