@@ -41,7 +41,7 @@ type RunRecord = {
   timestamps: {
     labeledAt: string;          // GitHub issue timeline "labeled" event
     draftPrOpenedAt?: string;   // GitHub pull request created_at
-    reviewPostedAt?: string;    // reviewer's review or comment on the PR
+    reviewPostedAt?: string;    // draft PR opened; Factory opens it only after the reviewer approves, verdict in the body
     mergedAt?: string;          // filled later; human merge
     deployedAt?: string;        // filled later; first successful deployment of the merge commit
   };

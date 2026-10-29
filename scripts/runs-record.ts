@@ -11,6 +11,7 @@ import { parseArgs } from "node:util";
 import {
   buildRecord,
   type GitHubInputs,
+  linkedPullRequest,
   mergeRecord,
   type RecordOverrides,
   type RunRecord,
@@ -22,7 +23,6 @@ import {
 const RUNS_DIR = "docs/runs";
 const ISSUE_URL = /github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)/;
 const JSON_EXTENSION = /\.json$/;
-const REVIEW_COMMENT = /\breview(er)?\b/i;
 
 const gh = <T>(path: string): T =>
   JSON.parse(
@@ -42,18 +42,6 @@ const readTraces = (id: string): Trace[] =>
       maxBuffer: 256 * 1024 * 1024,
     })
   ) as Trace[];
-
-const reviewTimes = (repo: string, pr: number): string[] => {
-  const reviews = gh<Array<{ submitted_at?: string }>>(
-    `repos/${repo}/pulls/${pr}/reviews`
-  ).map((review) => review.submitted_at);
-  const comments = gh<Array<{ created_at: string; body?: string }>>(
-    `repos/${repo}/issues/${pr}/comments`
-  )
-    .filter((comment) => REVIEW_COMMENT.test(comment.body ?? ""))
-    .map((comment) => comment.created_at);
-  return [...reviews, ...comments].filter((t): t is string => Boolean(t));
-};
 
 const deployedAt = (repo: string, pr: number): string | undefined => {
   const { merge_commit_sha: sha, merged_at: mergedAt } = ghOne<{
@@ -103,14 +91,16 @@ const main = () => {
   const timeline = gh<GitHubInputs["timeline"]>(
     `repos/${repo}/issues/${number}/timeline`
   );
-  const prNumber = timeline.find((e) => e.source?.issue?.pull_request)?.source
-    ?.issue?.number;
+  const label = process.env.FACTORY_LABEL ?? "factory";
+  const labeledAt = timeline.find(
+    (e) => e.event === "labeled" && e.label?.name === label
+  )?.created_at;
+  const prNumber = linkedPullRequest(timeline, labeledAt)?.number;
   const github: GitHubInputs = {
     deployedAt: prNumber ? deployedAt(repo, prNumber) : undefined,
     issue,
-    label: process.env.FACTORY_LABEL ?? "factory",
+    label,
     repo,
-    reviewTimes: prNumber ? reviewTimes(repo, prNumber) : [],
     timeline,
   };
 
