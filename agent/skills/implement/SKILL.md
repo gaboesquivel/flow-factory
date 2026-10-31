@@ -8,14 +8,28 @@ disable-model-invocation: true
 
 Read the relevant request, repository instructions, current context, and code. If the user supplies a task reference, retrieve it with available tools and resolve consequential ambiguity. A tracker, setup step, or formal spec is not a prerequisite for a clear small change.
 
-State the intended observable result and implement the smallest useful increment using existing patterns. Preserve unrelated working-tree changes. Do not add scope just because it is nearby. Ordinary small fixes do not need architecture work or a formal spec.
+State the intended observable result and implement the smallest useful increment using existing patterns. Preserve unrelated working-tree changes. Ordinary small fixes do not need architecture work or a formal spec.
 
-For consequential domain or API changes, understand module ownership, name the data shapes and caller expectations before committing to a new abstraction, and prefer a small executable test over extended debate when an observable fact is cheap to check.
+## Shared language
 
-For meaningful behavior changes, prefer tests at established public interfaces when the project already tests that way. Run focused checks while working and applicable final checks once the change stabilizes.
+A resolved `GLOSSARY.md` term names its concept everywhere: code identifiers, test names, and agent interfaces (tool and API names). Never introduce a second name for it. When the request uses a synonym, settle the meaning from the glossary, then from code and docs, and use the resolved term. When those sources conflict or are silent and the meaning changes behavior, make the narrowest reasonable choice and record it as a deviation. Add a glossary entry only for a term the work resolves and that will recur.
 
-Review the actual changed files, including untracked files, against the request and project constraints. Optional `review` skill guidance can inform a self-check when that skill is installed; a separate review pass is not required.
+## Tests
 
-When behavior or accepted context changes, update owning documentation. For meaningful product, design, architecture, or terminology shifts, align the current project's `PRODUCT.md`, `DESIGN.md`, `GLOSSARY.md`, and `ARCHITECTURE.md` (create a root file only when it would hold meaningful content about that project). Do not replace a project's product identity with Flow's methodology identity. `flow start` and "start project" do not authorize initialization; do not scaffold a new repository unless the `start` skill is installed and explicitly invoked (decision 0010). Link to specs or decisions instead of duplicating durable rationale; do not open new spec or decision files unless the user asked or the work already uses that convention.
+A testing policy in the target repository's `ARCHITECTURE.md` overrides this default.
 
-Report the result, files, checks, limitations, and remaining work. Commit, publish, push, or deploy only when that delivery action is already authorized; implementation alone does not require it.
+- **Contracts are test-first.** When the change adds or changes a contract (an API route, an MCP tool, or the domain function behind them), write its focused check first, run only that check and see it fail, then implement until it passes. The check covers what a caller depends on: input, result, the errors a caller can act on, and permissions. One check per behavior, not per function.
+- **Other behavior** gets a focused check that fails without the change, in any order. Internals behind a contract get no separate tests unless their logic is the risk.
+- **No UI tests by default.** Add a UI or end-to-end test only when the work item asks for one or the same UI regression returns.
+- **Focused, then full once.** While working, run only the focused check (its file or test name). Run the repository's full checks once, on the final head before delivery.
+- **Proportion.** Docs, configuration, and copy changes get no new check; a small fix gets one focused check or a reproduction.
+
+## Scope
+
+The accepted scope is the work item and its plan. Do not add scope because it is nearby: no unrequested dependency, refactor, UI surface, or test harness. A small prefactor the accepted work needs proceeds. A correctness, security, or required-check failure is fixed inside the work, never cut by weakening a check. Before delivery, compare the diff with the scope and name additions nobody asked for and accepted behavior it does not deliver.
+
+## Delivery
+
+When behavior or vocabulary changes, update the target project's owning documentation (`PRODUCT.md`, `DESIGN.md`, `GLOSSARY.md`, `ARCHITECTURE.md`) only in the sections affected. Do not replace a project's product identity with Flow's methodology identity. Do not open new spec or decision files unless the work item asked or the repository already uses that convention.
+
+Report the result, files, checks with their real output, limitations, and remaining work. Report elapsed time and cost only when observed; otherwise say "not measured". Commit, push, or deploy only when that delivery action is already authorized.

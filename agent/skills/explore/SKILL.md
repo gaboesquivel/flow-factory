@@ -12,7 +12,7 @@ Classify the work (new product, existing product change, or internal improvement
 
 Map users, jobs to be done, constraints, risks, and open questions. Distinguish accepted decisions from proposals. Separate missing product information from implementation detail that can remain undecided.
 
-Optional supporting skills may help when explicitly invoked or when the user asks for that kind of work: `interview` or `jtbd` for customer evidence, `competitors` for alternatives, `grill` for focused challenge, `to-spec` when the next step is a written increment. Missing optional skills must not block exploration.
+Use the target's `GLOSSARY.md` terms when restating the work; a synonym in the request maps to the resolved term. Load `to-spec` only when the next step is a written increment.
 
 Stop when the problem, intended outcome, and next useful activity are clear enough for the requested work. Return a concise summary: known facts, unresolved assumptions, recommended next activity, and whether implementation is still unauthorized.
 

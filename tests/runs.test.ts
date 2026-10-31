@@ -212,6 +212,44 @@ test("summary names unknown cost instead of counting it as zero", () => {
   assert.equal(summary.labelToProductionMs.median, null);
 });
 
+test("summary reports merge time, revision rounds, and interventions", () => {
+  const merged = buildRecord(
+    {
+      ...github,
+      timeline: [
+        github.timeline[0] as GitHubInputs["timeline"][number],
+        {
+          event: "cross-referenced",
+          source: {
+            issue: {
+              created_at: "2026-11-01T10:20:00Z",
+              html_url: "https://github.com/acme/widgets/pull/8",
+              number: 8,
+              pull_request: { merged_at: "2026-11-01T12:00:00Z" },
+            },
+          },
+        },
+      ],
+    },
+    traces,
+    "a"
+  );
+  const assisted = buildRecord(github, traces.slice(0, 2), "b", {
+    intervention: true,
+  });
+  const summary = summarize([merged, assisted]);
+  assert.deepEqual(summary.labelToMergeMs, { known: 1, median: 120 * 60_000 });
+  assert.deepEqual(summary.revisionRounds, { max: 1, median: 0.5 });
+  assert.equal(summary.interventions, 1);
+  assert.equal(summary.unattendedSuccesses, 1);
+});
+
+test("an empty summary reports unknowns, not zeros", () => {
+  const summary = summarize([]);
+  assert.deepEqual(summary.labelToMergeMs, { known: 0, median: null });
+  assert.deepEqual(summary.revisionRounds, { max: null, median: null });
+});
+
 test("review notes count verdicts", () => {
   assert.deepEqual(
     countVerdicts(

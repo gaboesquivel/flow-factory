@@ -9,8 +9,12 @@ export interface RunSummary {
     failedStation: string | null;
   }>;
   findings: Record<Verdict, number>;
+  /** Runs where a person stepped in between label and reviewed draft PR. */
+  interventions: number;
+  labelToMergeMs: { median: number | null; known: number };
   labelToProductionMs: { median: number | null; known: number };
   labelToReviewedPrMs: { median: number | null; p90: number | null };
+  revisionRounds: { median: number | null; max: number | null };
   runs: number;
   spendPerPullRequestUsd: {
     median: number | null;
@@ -63,6 +67,10 @@ export const summarize = (
   const reviewed = records
     .map((r) => between(r.timestamps.labeledAt, r.timestamps.reviewPostedAt))
     .filter((ms): ms is number => ms !== undefined);
+  const merge = records
+    .map((r) => between(r.timestamps.labeledAt, r.timestamps.mergedAt))
+    .filter((ms): ms is number => ms !== undefined);
+  const rounds = records.map((r) => r.revisionRounds);
   const production = records
     .map((r) => between(r.timestamps.labeledAt, r.timestamps.deployedAt))
     .filter((ms): ms is number => ms !== undefined);
@@ -113,6 +121,8 @@ export const summarize = (
         outcome: r.outcome,
       })),
     findings,
+    interventions: records.filter((r) => r.intervention).length,
+    labelToMergeMs: { known: merge.length, median: percentile(merge, 50) },
     labelToProductionMs: {
       known: production.length,
       median: percentile(production, 50),
@@ -120,6 +130,10 @@ export const summarize = (
     labelToReviewedPrMs: {
       median: percentile(reviewed, 50),
       p90: percentile(reviewed, 90),
+    },
+    revisionRounds: {
+      max: rounds.length > 0 ? Math.max(...rounds) : null,
+      median: percentile(rounds, 50),
     },
     runs: records.length,
     spendPerPullRequestUsd: {
@@ -146,8 +160,10 @@ const usd = (value: number | null) =>
 /** Human-readable form of {@link summarize}'s result. */
 export const formatSummary = (summary: RunSummary): string => {
   const lines = [
-    `Unattended success: ${summary.unattendedSuccesses} of ${summary.runs}`,
+    `Unattended success: ${summary.unattendedSuccesses} of ${summary.runs} (${summary.interventions} with intervention)`,
+    `Revision rounds: median ${summary.revisionRounds.median ?? "unknown"}, max ${summary.revisionRounds.max ?? "unknown"}`,
     `Label → reviewed draft PR: median ${minutes(summary.labelToReviewedPrMs.median)}, p90 ${minutes(summary.labelToReviewedPrMs.p90)}`,
+    `Label → merge: median ${minutes(summary.labelToMergeMs.median)} (${summary.labelToMergeMs.known} known)`,
     `Label → production: median ${minutes(summary.labelToProductionMs.median)} (${summary.labelToProductionMs.known} known)`,
     "Per-station median duration:",
     ...Object.entries(summary.stationMedianDurationMs).map(

@@ -8,7 +8,7 @@ You have no stake in the implementation. Review it as if a colleague you've neve
 
 The factory repository is checked out at `/workspace/repo` on its default branch. Fetch the branch under review with `checkout_branch`, then read the actual changes: `git diff <base>...<branch>` (the implementer's report names the base). Never judge from the change summary alone; summaries describe intent, diffs describe reality.
 
-Where a claim is cheap to check, check it: re-run the verification commands the implementer reports, or at least the fastest of them (typecheck, lint, the targeted tests). Distrust "it should work"; look for actual output.
+Where a claim is cheap to check, check it: re-run the focused checks for the changed behavior, not the full suite the implementer already ran on this head. Distrust "it should work"; look for actual output.
 
 ## Review in this order
 
@@ -29,4 +29,4 @@ Do not approve out of politeness, and do not request changes over pure style pre
 
 ## Flow judgment
 
-Load `review` for evidence-based review. Judge the real diff. Use proportional blast-radius analysis only for consequential changes. Flag replacement of the target product identity with Flow's methodology identity. You never modify code.
+Load `review` for evidence-based review. Judge the real diff. A changed contract without a check that would fail without the change, or a second name for a glossary concept, is a finding. Use proportional blast-radius analysis only for consequential changes. Flag replacement of the target product identity with Flow's methodology identity. You never modify code.
