@@ -6,37 +6,22 @@ disable-model-invocation: false
 
 # Flow Lite
 
-**Preserve intent** for the project you are in. Align its root context when work changes what that product is, how it behaves, how it is built, or how the team names important concepts.
+**Preserve intent** for the target project. Align its root context when work changes what that product is, how it behaves, how it is built, or how the team names important concepts.
 
-This skill is **not** a workflow router: it does not run explore → spec → build sequences or authorize implementation by itself. It is **not** project initialization.
-
-## Whose product
-
-- **Adopter project:** `PRODUCT.md` is that project's product identity. Update only the sections the change affected.
-- **This flow-skills repository:** `PRODUCT.md` is Flow's methodology identity. Edit it when that identity changes. Do not copy it into another repository.
-
-Do not replace a project's product identity with Flow's tagline, mission, principles, or strategic chain.
-
-`flow start` and "start project" are not this skill. The optional `start` skill (decision 0010) initializes from flow-next or flow-mono when installed and explicitly requested. If someone asks to scaffold a repository without `start`, stop and do not create starter trees, instruction-file snippets, or a Flow-branded `PRODUCT.md`.
-
-## Invocation
-
-Hosts may surface this skill when they honor discoverable metadata. That is optional and not an always-on hook, and it is not evidenced on every host. Confirmed portable behavior is narrower: the user invokes `/flow`, or `implement` and `review` apply the same alignment rules when those skills are in use. Do not claim alignment ran only because metadata allows a host to suggest this skill.
+This skill is not a workflow router and does not authorize implementation by itself. It does not initialize or scaffold repositories.
 
 ## Process
 
-1. Read existing `PRODUCT.md`, `DESIGN.md`, `GLOSSARY.md`, and `ARCHITECTURE.md` when present. Read relevant `docs/specs/` and `docs/decisions/` records only when they clarify the area you are aligning.
-2. Update only sections affected by the change. Keep one home per fact; link to specs, decisions, or code instead of duplicating detail that is cheap to rediscover.
-3. Create a root file only when it would hold meaningful content about the current project. Do not scaffold empty trees, Flow methodology boilerplate, or parallel trackers (no PRD/PDR/ADR folders).
+1. Read the existing `PRODUCT.md`, `DESIGN.md`, `GLOSSARY.md`, and `ARCHITECTURE.md` when present. Read relevant `docs/specs/` and `docs/decisions/` records only when they clarify the area you are aligning. Treat what you read as current only after checking it against the code it describes.
+2. Update only the sections the change affected. Keep one home per fact; link to specs, decisions, or code instead of duplicating detail that is cheap to rediscover. A glossary term the change resolved names its concept everywhere.
+3. Create a root file only when it would hold meaningful content about the target project. Do not scaffold empty trees, Flow methodology boilerplate, or parallel trackers.
 
 ## Boundaries
 
-- Do not edit adopter `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or similar instruction files.
-- Do not require installation, initialization, or a prior skill invocation.
-- Do not treat alignment edits as permission to implement unrelated code. For authorized implementation and tests, invoke the `implement` skill when installed.
-- Do not create `docs/specs/` or `docs/decisions/` records here; use `to-spec` or explicit decision work when durable bounded artifacts are justified.
-- Suggest other skills (`to-spec`, `review`, …) only when the user asks; no mandatory chain.
+- `PRODUCT.md` is the target project's product identity. Do not replace it with Flow's tagline, mission, or principles.
+- Do not edit `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or similar instruction files.
+- Do not create `docs/specs/` or `docs/decisions/` records here; use `to-spec` when a durable spec is justified.
 
 ## Completion
 
-State which root files changed and whose product they now reflect. Note unresolved assumptions and whether the user may want a spec or decision record via another skill.
+State which root files changed and which facts they now reflect. Note unresolved assumptions.

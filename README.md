@@ -65,7 +65,7 @@ FACTORY_REPO=owner/repo GITHUB_CONNECTOR=github/your-connector pnpm validate
 pnpm test
 ```
 
-**Evals** call live models. After linking the Vercel project, pull gateway credentials:
+**Evals** call paid live models and never run in CI; run them only when you need the evidence. After linking the Vercel project, pull gateway credentials:
 
 ```bash
 vercel link

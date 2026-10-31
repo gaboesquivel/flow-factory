@@ -12,7 +12,7 @@ Specs may cover product, research, marketing, engineering, operations, or cross-
 
 ## Process
 
-1. Explore the repository when needed. Use the project's domain vocabulary and respect decision records in the area you are touching.
+1. Explore the repository when needed. Name things with the project's `GLOSSARY.md` terms, never a second name for a resolved concept, and respect decision records in the area you are touching.
 
 2. Sketch test seams at the highest practical level. Prefer existing seams; propose new ones only when necessary and as high as possible.
 
@@ -44,7 +44,7 @@ When a prototype encodes a decision more precisely than prose (state machine, sc
 
 ## Testing Decisions
 
-What good tests mean here, which behavior is in scope, and prior art in the codebase.
+**Behavior and checks:** the observable behavior at the contract as concrete examples with realistic domain data, the invariants that must always hold, and the focused check that proves each (the seam, and the command that runs only it). State behavior, not implementation steps. Contracts get test-first checks; UI gets none by default (`implement` Tests).
 
 ## Out of Scope
 

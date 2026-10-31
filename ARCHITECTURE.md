@@ -30,7 +30,7 @@ Draft PR on FACTORY_REPO (human marks ready / merges)
 
 ## Flow integration
 
-Flow Skills live under [agent/skills/](agent/skills/) (`explore`, `to-spec`, `implement`, `review`, `flow`). Station `instructions.md` files tell agents when to load them. There is no second workflow router and no mandatory spec for trivial fixes.
+Flow Skills live under [agent/skills/](agent/skills/) (`explore`, `to-spec`, `implement`, `review`, `flow`); [FLOW_SKILLS.md](agent/skills/FLOW_SKILLS.md) maps each to its upstream source. Station `instructions.md` files tell agents when to load them. Stations name things with the target's `GLOSSARY.md` terms, write a contract's focused check first, run the full checks once on the final head, and stay inside the plan's scope. There is no second workflow router and no mandatory spec for trivial fixes.
 
 ## Models
 
