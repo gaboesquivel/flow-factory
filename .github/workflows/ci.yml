@@ -1,25 +1,55 @@
 name: CI
 
+# Checks run once per PR head. Pushes to main only refresh the dependency
+# cache when the lockfile or toolchain changes: PR caches are branch-scoped,
+# so PRs can only reuse a cache that main saved.
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - package.json
+      - .nvmrc
+      - .github/workflows/ci.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       FACTORY_REPO: acme/widgets
       GITHUB_CONNECTOR: github/foreman-agent
       FACTORY_MODEL_PROFILE: gateway
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with:
           version: 10.14.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm validate
-      - run: pnpm test
+          node-version-file: .nvmrc
+      # A node_modules hit skips pnpm install entirely.
+      - id: deps
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}
+      - if: steps.deps.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+      - if: github.event_name == 'pull_request'
+        run: pnpm validate
+      - if: github.event_name == 'pull_request'
+        run: pnpm test
