@@ -4,7 +4,7 @@ Open-source software factory on [Eve](https://eve.dev) and [Foreman](https://git
 
 Flow Skills provide product-engineering discipline inside each station without a second workflow engine.
 
-Upstream baseline: [UPSTREAM.md](UPSTREAM.md).
+Upstream baseline: [UPSTREAM.md](UPSTREAM.md). Development skill setup and the separate runtime adaptations: [docs/agent-skills.md](docs/agent-skills.md).
 
 ## Prerequisites
 
@@ -37,11 +37,11 @@ pnpm dev               # Eve TUI
 
 ## Model configuration
 
-| Profile | Env | Use |
-| --- | --- | --- |
-| `gateway` | `FACTORY_MODEL_PROFILE=gateway` (default) | Vercel AI Gateway models (required on Vercel) |
-| `local` | `FACTORY_MODEL_PROFILE=local` + `FACTORY_LOCAL_BASE_URL` + `FACTORY_LOCAL_MODEL_*` | Ollama, LM Studio, or other OpenAI-compatible servers |
-| `hybrid` | `FACTORY_MODEL_PROFILE=hybrid` | Local orchestrator/classifier; gateway for other stations |
+| Profile   | Env                                                                                | Use                                                       |
+| --------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `gateway` | `FACTORY_MODEL_PROFILE=gateway` (default)                                          | Vercel AI Gateway models (required on Vercel)             |
+| `local`   | `FACTORY_MODEL_PROFILE=local` + `FACTORY_LOCAL_BASE_URL` + `FACTORY_LOCAL_MODEL_*` | Ollama, LM Studio, or other OpenAI-compatible servers     |
+| `hybrid`  | `FACTORY_MODEL_PROFILE=hybrid`                                                     | Local orchestrator/classifier; gateway for other stations |
 
 Probe local models: `pnpm models:check` (no-op for gateway profile).
 
@@ -72,10 +72,10 @@ vercel link
 pnpm exec eve link --non-interactive --team <team> --project flow-factory
 ```
 
-| Command | When |
-| --- | --- |
-| `pnpm eval:fast:local` | No GitHub Connect: runs `fast` evals except `needs-connect` (smoke + no-direct-push-to-main) |
-| `pnpm eval:fast` | Full fast suite; set `FACTORY_REPO`, `GITHUB_CONNECTOR`, and a repo with issue `#1` for label routing evals |
+| Command                | When                                                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `pnpm eval:fast:local` | No GitHub Connect: runs `fast` evals except `needs-connect` (smoke + no-direct-push-to-main)                |
+| `pnpm eval:fast`       | Full fast suite; set `FACTORY_REPO`, `GITHUB_CONNECTOR`, and a repo with issue `#1` for label routing evals |
 
 Against a deployment: `pnpm exec eve eval --tag fast --url https://<your-deployment>`.
 

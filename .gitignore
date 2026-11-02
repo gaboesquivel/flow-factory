@@ -10,6 +10,7 @@ dist
 .DS_Store
 *.tsbuildinfo
 .agents/
+.claude/skills/
 
 # Agent hosts: shared config is committed, per-machine state is not
 .claude/worktrees/
