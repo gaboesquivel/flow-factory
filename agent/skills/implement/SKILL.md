@@ -18,18 +18,23 @@ A resolved `GLOSSARY.md` term names its concept everywhere: code identifiers, te
 
 A testing policy in the target repository's `ARCHITECTURE.md` overrides this default.
 
-- **Contracts are test-first.** When the change adds or changes a contract (an API route, an MCP tool, or the domain function behind them), write its focused check first, run only that check and see it fail, then implement until it passes. The check covers what a caller depends on: input, result, the errors a caller can act on, and permissions. One check per behavior, not per function.
-- **Other behavior** gets a focused check that fails without the change, in any order. Internals behind a contract get no separate tests unless their logic is the risk.
-- **No UI tests by default.** Add a UI or end-to-end test only when the work item asks for one or the same UI regression returns.
-- **Focused, then full once.** While working, run only the focused check (its file or test name). Run the repository's full checks once, on the final head before delivery.
-- **Proportion.** Docs, configuration, and copy changes get no new check; a small fix gets one focused check or a reproduction.
+- **Contracts are test-first.** For a new or changed API route, MCP tool, or the domain function behind them, write the focused check first, run only it, and see it fail. Cover input, result, actionable errors, and permissions, one check per behavior; test adapters only for agreeing with it.
+- **Other behavior** gets a focused check that fails without the change; docs, configuration, copy, and prototypes get none.
+- **No UI tests by default.** Add one only when the work item asks or the same UI regression returns.
+- **Focused, then full once:** focused checks while working; the repository's full checks once, on the final head before delivery.
 
 ## Scope
 
-The accepted scope is the work item and its plan. Do not add scope because it is nearby: no unrequested dependency, refactor, UI surface, or test harness. A small prefactor the accepted work needs proceeds. A correctness, security, or required-check failure is fixed inside the work, never cut by weakening a check. Before delivery, compare the diff with the scope and name additions nobody asked for and accepted behavior it does not deliver.
+Accepted scope: the work item and its plan, or the spec's acceptance scenario, Out of Scope, and appetite.
+
+- **New scope** (a dependency, refactor, UI surface, infrastructure, test harness, or another spec) is not started because it is nearby; record it as a deviation recommending defer, replace, or reject. A small prefactor the accepted work needs proceeds.
+- **Blockers are not scope.** A correctness, security, or required-check failure is fixed inside the work or reported as why it cannot ship, never cut by weakening a check.
+- **Data changes:** a stored-data shape change ships as a versioned migration with the code, never a schema applied to a shared or deployed database. A destructive step (dropping, renaming, or narrowing a table or column) goes through expand-contract, or is left out and reported; name its rollback or backup first. Never seed, reset, or truncate shared data.
+- **Spend:** a paid operation, such as a live evaluation, runs only when its result changes a decision.
+- **Before delivery**, compare the diff with the scope and name unrequested additions and accepted behavior it does not deliver.
 
 ## Delivery
 
 When behavior or vocabulary changes, update the target project's owning documentation (`PRODUCT.md`, `DESIGN.md`, `GLOSSARY.md`, `ARCHITECTURE.md`) only in the sections affected. Do not replace a project's product identity with Flow's methodology identity. Do not open new spec or decision files unless the work item asked or the repository already uses that convention.
 
-Report the result, files, checks with their real output, limitations, and remaining work. Report elapsed time and cost only when observed; otherwise say "not measured". Commit, push, or deploy only when that delivery action is already authorized.
+Report the result, files, checks with their real output, limitations, and remaining work. Report elapsed time and cost only when observed; otherwise say "not measured". Commit, push, or deploy only when that delivery action is already authorized. Never commit or push to the default branch, rewrite a remote branch, skip or weaken a check, or do anything destructive or unrelated.

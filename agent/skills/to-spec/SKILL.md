@@ -4,54 +4,49 @@ description: Turn the current conversation into a numbered specification using p
 disable-model-invocation: true
 ---
 
-Turn conversation context and repository understanding into a proportionate specification. Do not run a separate interview; synthesize what is already known and label unresolved assumptions rather than inventing decisions. Keep consequential assumptions visible.
+Turn conversation context and repository understanding into a proportionate specification. Do not run a separate interview; synthesize what is already known and label unresolved assumptions rather than inventing decisions.
 
-Use the project's existing spec location when one exists. When the project has no convention, default new work to `docs/specs/NNN-short-name.md` (three-digit sequence, kebab-case slug) and follow the same pattern for updates. Use `docs/decisions/NNN-short-name.md` only for standalone consequential decisions, not for feature scope. Preserve existing numbering, labels, and trackers when the repository already uses them.
+Use the project's existing spec location when one exists, else `docs/specs/NNN-short-name.md` (next three-digit number, kebab-case slug). Preserve existing numbering, labels, and trackers. A written spec starts as `Status: draft (YYYY-MM-DD).`; acceptance happens outside this skill.
 
-Specs may cover product, research, marketing, engineering, operations, or cross-functional work. Use the sections below only when they fit the discipline; omit irrelevant headings. Keep small, understood changes brief.
+**One bet.** A spec tests one assumption and ships as one unit; split only when a part proves something or ships safely alone, or needs an earlier part's learning. A choice gets a decision record (`docs/decisions/NNNN-short-name.md`, status **Proposed**) only when it chose among real alternatives **and** reaches beyond this spec or is costly to reverse; otherwise it is a Decisions bullet. Records never hold scope or tasks.
+
+**Length.** About 1,000 words at most: link records, glossary, and code instead of restating them. Keep small, understood changes brief, and omit headings that do not fit the discipline.
 
 ## Process
 
-1. Explore the repository when needed. Name things with the project's `GLOSSARY.md` terms, never a second name for a resolved concept, and respect decision records in the area you are touching.
-
-2. Sketch test seams at the highest practical level. Prefer existing seams; propose new ones only when necessary and as high as possible.
-
-3. Write a proportionate spec using the relevant sections below. Save or publish only when requested.
+1. Explore only what the conversation lacks. Name things with the project's `GLOSSARY.md` terms, never a second name for a resolved concept, and respect decision records in the area you are touching. Sketch test seams, preferring existing high-level ones.
+2. Write the spec from the template below. Save or publish only when requested.
 
 <spec-template>
 
-## Problem Statement
+## Problem
 
-The problem from the affected user's perspective.
+Who is affected, what fails today, and the evidence.
 
 ## Solution
 
-The intended solution from the user's perspective.
+The change, from the user's side.
 
-## User Stories
+## Decisions
 
-Essential scenarios and acceptance criteria when they improve clarity, for example:
+Only choices that shape execution, contract-first: typed API, MCP tools when agents are users, and errors and permissions an agent can act on.
 
-1. As an <actor>, I want a <feature>, so that <benefit>
+**Exposure** (required for deployable behaviour): where it runs, who can reach it, and how writes behave without authentication; with authentication out of scope, writes fail closed.
 
-Cover consequential paths and failure cases without redundant stories.
+**Appetite** (substantial work): the first verifiable slice, what gives way first, and any material cost limit.
 
-## Implementation Decisions
+A direction change without a record: the file, old position, new one.
 
-Decisions that shape execution: modules, interfaces, contracts, schema, or interactions. Prefer stable interfaces and intent over exhaustive file lists.
+## Acceptance
 
-When a prototype encodes a decision more precisely than prose (state machine, schema, type shape), inline the decision-rich excerpt and note that it came from a prototype.
+**Acceptance scenario** (required; review gives each step a verdict): the actor, the starting state with realistic data, and numbered steps with observable results; for agent users, also through the MCP tool. A metric the work should move gets a step proving it counts correctly.
 
-## Testing Decisions
-
-**Behavior and checks:** the observable behavior at the contract as concrete examples with realistic domain data, the invariants that must always hold, and the focused check that proves each (the seam, and the command that runs only it). State behavior, not implementation steps. Contracts get test-first checks; UI gets none by default (`implement` Tests).
+Then invariants, each with the focused check proving it (seam and command), per `implement` Tests.
 
 ## Out of Scope
 
-What this increment explicitly does not include.
-
-## Further Notes
-
-Additional context that helps execution or review.
+What this increment does not include.
 
 </spec-template>
+
+A spec without an acceptance scenario, or without **Exposure** when it adds deployable behaviour, is incomplete: name what is missing.
